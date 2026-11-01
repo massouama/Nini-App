@@ -35,6 +35,17 @@ L'app ne se connecte jamais à rien. Une fois installée, elle est servie unique
 
 **Publication** : `npm run build:pwa` produit `dist-pwa/` (6 fichiers statiques, à héberger n'importe où en HTTPS). Avec GitHub Pages : *Settings → Pages → Source : GitHub Actions*, puis *Actions → Publier l'app iPad → Run workflow*. Sur un compte GitHub gratuit, Pages exige un dépôt public. Le code ne contient aucune donnée client.
 
+## Preuve qu'aucune donnée ne sort
+
+*Réglages → Sécurité* affiche l'état du verrou et un **journal de sécurité** tenu sur l'appareil. Il ne peut pas être effacé depuis l'app et garde les 1 000 dernières entrées. On y trouve :
+- chaque ouverture de l'app, avec l'état du verrou ;
+- chaque tentative de connexion **bloquée par le navigateur** (événements `securitypolicyviolation`) ;
+- chaque requête refusée par le module hors ligne sur iPad ;
+- une **alerte** si une ressource externe a réellement été chargée sans être bloquée (contrôle indépendant via `PerformanceObserver`) ;
+- chaque export ou restauration volontaire de fichier.
+
+Le bouton **Tester le verrou** tente 4 envois (fetch, beacon, image, WebSocket) vers un domaine réservé `.invalid`, qui n'existe pas. Chaque canal doit apparaître « bloqué ». Le journal s'exporte en CSV. Vérification indépendante : outils de développement (F12 → Réseau) sur PC, mode avion sur iPad.
+
 ## Fonctionnalités
 
 - **Aujourd'hui** : retards, tâches du jour, les 7 prochains jours classés par date, tâches en attente du client (avec le nombre de jours depuis la relance).

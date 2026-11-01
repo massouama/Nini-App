@@ -5,6 +5,8 @@ import { useConfirm } from '../components/ui/Confirm';
 import { useToast } from '../components/ui/Toasts';
 import { useBackup } from '../components/useBackup';
 import { RoutineEditor } from '../components/RoutineEditor';
+import { SecurityPanel } from '../components/SecurityPanel';
+import { logSecurity } from '../lib/securityLog';
 import { useData, useStore } from '../data/StoreContext';
 import { normalizeData } from '../data/normalize';
 import { supabase } from '../data/supabase';
@@ -41,6 +43,7 @@ export function SettingsPage({ email }: { email?: string }) {
       });
       if (!ok) return;
       await store.replaceAll(parsed);
+      logSecurity('restore', `Sauvegarde restaurée depuis le fichier ${file.name} (${parsed.clients.length} dossiers, ${parsed.tasks.length} tâches)`);
       toast('Sauvegarde restaurée');
     } catch {
       toast('Fichier de sauvegarde invalide.', { tone: 'error' });
@@ -71,6 +74,10 @@ export function SettingsPage({ email }: { email?: string }) {
   return (
     <div className="page narrow">
       <PageHeader title="Réglages" />
+
+      <Section title="Sécurité">
+        <SecurityPanel />
+      </Section>
 
       <Section title="Profil">
         <label className="field"><span>Prénom (affiché sur l’accueil et les rapports)</span>

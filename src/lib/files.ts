@@ -1,3 +1,5 @@
+import { logSecurity } from './securityLog';
+
 /** CSV au format Excel français (séparateur « ; » + BOM UTF-8). */
 export const csv = (rows: (string | number | null | undefined)[][]) => {
   const cell = (v: unknown) => {
@@ -12,6 +14,7 @@ const isIOS = () =>
 
 export const download = (filename: string, content: string, mime = 'text/plain') => {
   const blob = new Blob([content], { type: `${mime};charset=utf-8` });
+  logSecurity('export', `Export volontaire d’un fichier : ${filename} (${Math.max(1, Math.round(blob.size / 1024))} Ko), enregistré sur l’appareil`);
   // Sur iPad / iPhone : feuille de partage (AirDrop, « Enregistrer dans Fichiers »…), qui fonctionne aussi
   // dans l'app installée sur l'écran d'accueil. Aucun envoi réseau : c'est le système qui propose les choix.
   const file = new File([blob], filename, { type: mime });

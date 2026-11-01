@@ -200,6 +200,20 @@ Pour sauvegarder depuis l’iPad : \btn{Exporter une sauvegarde}, puis AirDrop o
 \pasfaire{N’utilise pas la navigation privée.}{Tout serait perdu à la fermeture de la fenêtre.}
 \pasfaire{N’envoie pas une sauvegarde par mail perso, WhatsApp ou cloud perso.}{Elle contient les noms des clients. C’est un document confidentiel du cabinet.}
 
+% ---------- Preuve ----------
+\section{Prouver qu’aucune donnée ne sort}
+Nini tient un \btn{journal de sécurité} sur chaque appareil : \btn{Réglages → Sécurité}.
+\begin{etapes}
+  \item Vérifie le bandeau vert : \btn{Verrou réseau actif}.
+  \item Clique sur \btn{Tester le verrou} : Nini essaie d’envoyer des données de 4 façons. Les 4 doivent être \btn{bloquées}.
+  \item Le compteur \btn{requête vers l’extérieur} doit rester à \btn{0}. Sinon, le bandeau devient rouge.
+  \item \btn{Exporter le journal} donne un fichier Excel daté, à garder ou à montrer.
+\end{etapes}
+\begin{note}
+\textbf{Vérifier sans faire confiance à Nini :} sur le PC, touche \kbd{F12} → onglet \btn{Réseau} : aucune ligne ne doit apparaître quand tu utilises Nini.
+Sur l’iPad : passe en mode avion, Nini fonctionne exactement pareil.
+\end{note}
+
 % ---------- En cas de souci ----------
 \section{En cas de souci}
 {\renewcommand{\arraystretch}{1.55}

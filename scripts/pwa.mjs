@@ -46,6 +46,8 @@ self.addEventListener('activate', event => {
 self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
   if (event.request.method !== 'GET' || url.origin !== self.location.origin) {
+    // Refusé, et signalé à l'app pour son journal de sécurité.
+    self.clients.matchAll().then(list => list.forEach(c => c.postMessage({ type: 'nini-blocked', method: event.request.method, url: event.request.url })));
     event.respondWith(Response.error());
     return;
   }

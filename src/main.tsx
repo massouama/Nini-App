@@ -4,6 +4,10 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App';
 import './styles/global.css';
+import { startSecurityMonitoring } from './lib/securityLog';
+
+// Journal de sécurité : ouverture de l'app, tentatives de connexion bloquées, exports.
+startSecurityMonitoring();
 
 // Demande au navigateur de ne pas effacer les données locales en cas de manque d'espace.
 void navigator.storage?.persist?.().catch(() => {});
