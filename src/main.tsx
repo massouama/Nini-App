@@ -8,6 +8,11 @@ import './styles/global.css';
 // Demande au navigateur de ne pas effacer les données locales en cas de manque d'espace.
 void navigator.storage?.persist?.().catch(() => {});
 
+// Version iPad : enregistre le module hors ligne (l'app reste disponible sans connexion).
+if (import.meta.env.MODE === 'pwa' && 'serviceWorker' in navigator) {
+  void navigator.serviceWorker.register('./sw.js').catch(() => {});
+}
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <App />

@@ -20,6 +20,21 @@ Projet **100 % open source** (licence MIT), comme toutes ses dépendances.
 
 Pour régénérer le fichier après une modification du code : `npm run build:offline`.
 
+## Sur iPad : une app installée, puis 100 % hors ligne
+
+L'iPad ne sait pas faire tourner un fichier HTML ouvert depuis l'app Fichiers. On installe donc Nini comme une app :
+
+1. **Une seule fois, avec Internet** : ouvrir l'adresse de l'app dans Safari.
+2. **Partager → Sur l'écran d'accueil → Ajouter.**
+3. Ouvrir Nini **depuis son icône**, puis *Réglages → Restaurer* et choisir la sauvegarde reçue par AirDrop.
+4. Ensuite, Wi-Fi coupé ou en mode avion : Nini fonctionne normalement.
+
+L'app ne se connecte jamais à rien. Une fois installée, elle est servie uniquement depuis la mémoire de l'iPad, et toute requête vers l'extérieur est refusée. Sur iPad, « Exporter une sauvegarde » ouvre la feuille de partage (AirDrop, *Enregistrer dans Fichiers*).
+
+⚠️ Supprimer l'icône de l'écran d'accueil efface les données de l'app sur l'iPad.
+
+**Publication** : `npm run build:pwa` produit `dist-pwa/` (6 fichiers statiques, à héberger n'importe où en HTTPS). Avec GitHub Pages : *Settings → Pages → Source : GitHub Actions*, puis *Actions → Publier l'app iPad → Run workflow*. Sur un compte GitHub gratuit, Pages exige un dépôt public. Le code ne contient aucune donnée client.
+
 ## Fonctionnalités
 
 - **Aujourd'hui** : retards, tâches du jour, les 7 prochains jours classés par date, tâches en attente du client (avec le nombre de jours depuis la relance).
