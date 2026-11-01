@@ -17,6 +17,8 @@ export interface Task {
   dueDate: string;
   /** Date à partir de laquelle on peut commencer (vide = dès maintenant). */
   startDate?: string;
+  /** Tâche reportée : date prévue de reprise (elle réapparaît ce jour-là dans « À reprendre »). */
+  reportedUntil?: string | null;
   estimate: string;
   description: string;
   recurrence: Recurrence;

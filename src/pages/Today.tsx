@@ -2,7 +2,8 @@ import { CalendarDays, CalendarRange, FolderPlus, Sparkles } from 'lucide-react'
 import { Link } from 'react-router-dom';
 import { PageHeader, Section } from '../components/PageHeader';
 import { QuickAdd } from '../components/QuickAdd';
-import { TaskList } from '../components/TaskRow';
+import { TaskList, TaskRow } from '../components/TaskRow';
+import { useToast } from '../components/ui/Toasts';
 import { useDialogs } from '../components/Dialogs';
 import { useData, useStore } from '../data/StoreContext';
 import { addDays, capitalize, fmtDate, fmtWeekday, today } from '../lib/dates';
@@ -10,6 +11,7 @@ import { plural } from '../lib/format';
 import { demoData } from '../domain/demo';
 import { fmtDays } from '../domain/planning';
 import { byDue, clientCode, isOpen, isOverdue, isStarted, startOf } from '../domain/tasks';
+import { resumeTask } from '../domain/postpone';
 import { pct } from '../lib/format';
 import { managerColor } from '../components/managers';
 import { useTaskNav } from '../components/useTaskNav';
@@ -19,6 +21,7 @@ export function TodayPage() {
   const store = useStore();
   const dialogs = useDialogs();
   const nav = useTaskNav();
+  const toast = useToast();
   const ref = today();
 
   if (!clients.length && !tasks.length) {
@@ -54,7 +57,8 @@ export function TodayPage() {
     const all = tasks.filter(t => t.title === title && startOf(t, settings.routine) === startOf(list[0], settings.routine));
     return { title, list, done: all.filter(t => t.status === 'done').length, total: all.length, due: list[0].dueDate };
   }).sort((a, b) => a.due.localeCompare(b.due));
-  const waiting = open.filter(t => t.status === 'waiting').sort((a, b) => (a.waitingSince ?? 0) - (b.waitingSince ?? 0));
+  const toResume = open.filter(t => t.reportedUntil && t.reportedUntil <= ref).sort(byDue);
+  const waiting = open.filter(t => t.status === 'waiting' && !toResume.includes(t)).sort((a, b) => (a.waitingSince ?? 0) - (b.waitingSince ?? 0));
   const weekCount = week.reduce((s, g) => s + g.tasks.length, 0);
 
   const summary = [
@@ -98,6 +102,23 @@ export function TodayPage() {
           <div className="empty-line">{settings.plans[ref.slice(0, 7)]?.length ? 'Aucun dossier planifié aujourd’hui.' : <>Pas encore de répartition pour ce mois. <Link to="/repartition">La proposer</Link></>}</div>
         )}
       </Section>
+
+      {toResume.length > 0 && (
+        <Section title="À reprendre" count={toResume.length}>
+          <p className="phase-line">Ces tâches avaient été reportées jusqu’à aujourd’hui. Les pièces sont arrivées ?</p>
+          <div className="task-list">
+            {toResume.map(t => (
+              <div key={t.id} className="resume-row">
+                <TaskRow task={t} extra={<span>reprise prévue {t.reportedUntil === ref ? 'aujourd’hui' : `le ${fmtDate(t.reportedUntil!, 'short')}`}</span>} />
+                <div className="resume-actions">
+                  <button className="btn sm primary" onClick={() => { store.upsertTasks([resumeTask(t)]); toast('Tâche reprise'); }}>Reprendre</button>
+                  <button className="btn sm" onClick={() => nav.open(t.id)}>Reporter encore</button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </Section>
+      )}
 
       {overdue.length > 0 && (
         <Section title="En retard" count={overdue.length} tone="late">

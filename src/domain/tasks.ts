@@ -49,7 +49,7 @@ export function startOf(t: Task, routine: RoutinePhase[]): string {
 /** Tâche commencée (date de début atteinte) et pas encore terminée. */
 export const isStarted = (t: Task, routine: RoutinePhase[], ref = today()) => {
   const s = startOf(t, routine);
-  return isOpen(t) && !!s && s <= ref;
+  return isOpen(t) && t.status !== 'waiting' && !!s && s <= ref;
 };
 
 export const timeSpent = (t: Task) => t.timeEntries.reduce((s, e) => s + (e.minutes || 0), 0);

@@ -31,3 +31,24 @@ export function workingDays(month: string): string[] {
 }
 
 export const lastWorkingDay = (month: string) => workingDays(month).at(-1)!;
+
+/** Jour ouvré situé n jours ouvrés après la date (n ≥ 1). */
+export function addWorkingDays(date: string, n: number): string {
+  const d = new Date(+date.slice(0, 4), +date.slice(5, 7) - 1, +date.slice(8, 10));
+  let left = n;
+  let holidays = frenchHolidays(d.getFullYear());
+  while (left > 0) {
+    d.setDate(d.getDate() + 1);
+    if (d.getMonth() === 0 && d.getDate() === 1) holidays = frenchHolidays(d.getFullYear());
+    const s = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    if (d.getDay() !== 0 && d.getDay() !== 6 && !holidays.has(s)) left--;
+  }
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+/** Prochain lundi ouvré strictement après la date. */
+export function nextMonday(date: string): string {
+  let d = addWorkingDays(date, 1);
+  while (new Date(+d.slice(0, 4), +d.slice(5, 7) - 1, +d.slice(8, 10)).getDay() !== 1) d = addWorkingDays(d, 1);
+  return d;
+}

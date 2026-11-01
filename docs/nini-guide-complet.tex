@@ -75,14 +75,14 @@
 \setlist[etapes]{label=\pastille{\arabic*}, leftmargin=28pt, labelsep=8pt, itemsep=4pt, topsep=4pt}
 \setlist[itemize]{leftmargin=16pt, itemsep=2pt, topsep=3pt, label={\color{accent}\textbullet}}
 
-\newcommand{\capture}[3][0.9\linewidth]{% largeur, fichier, légende
-  \begin{center}
+\newcommand{\capture}[3][0.9\linewidth]{% largeur, fichier, légende (gardées ensemble)
+  \par\medskip\noindent\begin{minipage}{\linewidth}\centering
   \begin{tcolorbox}[enhanced, width=#1, boxrule=0.5pt, colframe=line, colback=white, arc=5pt,
-    left=0pt, right=0pt, top=0pt, bottom=0pt, boxsep=0pt, before skip=6pt, after skip=2pt]
+    left=0pt, right=0pt, top=0pt, bottom=0pt, boxsep=0pt, before skip=0pt, after skip=3pt]
     \includegraphics[width=\linewidth]{images/#2}
   \end{tcolorbox}
   {\footnotesize\muted{#3}}
-  \end{center}}
+  \end{minipage}\par\medskip}
 
 \newtcolorbox{astuce}{enhanced, colback=accentsoft, colframe=accentsoft, arc=7pt, boxrule=0pt,
   left=11pt, right=11pt, top=7pt, bottom=7pt, before skip=8pt, after skip=8pt,
@@ -215,6 +215,7 @@ C’est la page à ouvrir chaque matin. De haut en bas :
 \begin{lexique}[0.3]
 Le résumé & Sous le titre : le nombre de tâches en retard, à traiter, pour aujourd’hui, dans les 7 jours, et chez le client. Clique dessus pour voir la liste. \\ \hline
 Au programme aujourd’hui & Les dossiers prévus ce jour dans ta répartition, avec la durée et l’avancement des étapes (par exemple « 1 h · 2/8 »). Un clic ouvre directement la bonne tâche. La période en cours est rappelée juste au-dessus. \\ \hline
+À reprendre & Les tâches que tu avais reportées et dont la date de reprise est arrivée. \btn{Reprendre} les remet en cours ; \btn{Reporter encore} rouvre la tâche pour choisir une autre date. \\ \hline
 En retard & Les tâches dont l’échéance est passée. \\ \hline
 Aujourd’hui & Les tâches à finir aujourd’hui, et un champ pour en ajouter une. \\ \hline
 À traiter en ce moment & Toutes les tâches de la période en cours, groupées. Pour chaque groupe : la date de fin et le nombre de tâches terminées. \\ \hline
@@ -265,10 +266,41 @@ Deux façons de noter ton temps :
 \subsection{Les boutons du haut}
 \begin{lexique}
 Chrono & Démarre ou arrête le chrono de cette tâche. \\ \hline
+Reporter & Met la tâche de côté jusqu’à une date de reprise (voir ci-dessous). \\ \hline
 Dupliquer & Crée une copie de la tâche, avec les mêmes étapes, toutes décochées. \\ \hline
 Supprimer & Supprime la tâche. Un message propose \btn{Annuler} pendant quelques secondes. \\ \hline
 Fermer & La croix, ou la touche \kbd{Échap}. \\ \hline
 \end{lexique}
+
+\subsection{Reporter une tâche bloquée}
+Le client n’a pas envoyé ses pièces à temps ? Tu reportes la tâche et tu prends autre chose à la place.
+\begin{etapes}
+  \item Ouvre la tâche, puis clique sur \btn{Reporter} en haut du panneau.
+  \item Choisis la raison : pièces manquantes du client, attente du manager, ou autre.
+  \item Choisis la date de reprise : \btn{Demain}, \btn{Dans 3 jours ouvrés}, \btn{Lundi prochain}, \btn{Dans 2 semaines}, ou une date au choix.
+  \item Si besoin, change l’échéance et précise ce qui manque (« relevés bancaires d’octobre »).
+  \item Laisse cochées les deux options : la tâche passe \textbf{En attente client}, et les créneaux prévus pour ce dossier d’ici la reprise sont \textbf{libérés} dans la répartition.
+  \item Clique sur \btn{Reporter au …}.
+\end{etapes}
+\capture[0.8\linewidth]{19-reporter.jpg}{La fenêtre « Reporter la tâche ».}
+\begin{attention}
+Si la reprise tombe après l’échéance, Nini l’affiche en orange : préviens le manager du dossier, ou repousse l’échéance si c’est possible.
+Les échéances légales (TVA…) ne se repoussent pas.
+\end{attention}
+
+\textbf{Ensuite, Nini te propose quoi faire à la place} :
+\begin{itemize}
+  \item \textbf{Disponibles maintenant} : les tâches des autres dossiers que tu peux traiter tout de suite, les plus urgentes d’abord ;
+  \item \textbf{À avancer} : les tâches des périodes suivantes que tu peux commencer en avance.
+\end{itemize}
+Les autres tâches du dossier bloqué ne sont pas proposées : elles attendent sans doute les mêmes pièces.
+Clique sur \btn{Prendre} : si du temps a été libéré aujourd’hui, il est donné à ce dossier dans ta répartition, et la tâche s’ouvre.
+\capture[0.8\linewidth]{20-a-la-place.jpg}{« Que faire à la place ? » : un clic sur Prendre.}
+\begin{astuce}
+Le jour de la reprise, la tâche réapparaît en haut de l’accueil, dans \btn{À reprendre}.
+Tu peux aussi la reprendre plus tôt : ouvre-la et clique sur \btn{Reprendre maintenant} dans le bandeau orange.
+Les jours libérés restent libres dans la répartition : tu peux y ajouter un créneau avec \btn{+ Ajouter}.
+\end{astuce}
 
 \subsection{Créer une tâche}
 Trois façons :
@@ -543,6 +575,7 @@ Ne travaille jamais sur deux appareils en même temps : la restauration remplace
 % =====================================================================
 \begin{lexique}[0.36]
 Je ne vois plus mes dossiers & \btn{Réglages → Restaurer}, puis choisis ta dernière sauvegarde. Vérifie aussi que tu as ouvert le bon fichier, dans le bon navigateur. \\ \hline
+Le client n’a pas envoyé ses pièces & Ouvre la tâche → \btn{Reporter}, choisis une date de reprise, puis prends une autre tâche à la place. \\ \hline
 J’ai coché une tâche par erreur & \btn{Annuler} dans le message en bas, ou clique à nouveau sur le rond. \\ \hline
 J’ai supprimé une tâche par erreur & \btn{Annuler} dans le message en bas, tout de suite. Sinon, restaure ta dernière sauvegarde. \\ \hline
 Les tâches du mois n’apparaissent pas & \btn{Répartition → Créer les tâches du mois}. \\ \hline
