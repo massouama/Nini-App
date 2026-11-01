@@ -1,7 +1,7 @@
 import { monthName, parse, withDay } from '../lib/dates';
 import { uid } from '../lib/format';
 import type { Client, RoutinePhase, Task } from './types';
-import { lastWorkingDay } from './workdays';
+import { lastWorkingDay, workingOnOrAfter, workingOnOrBefore } from './workdays';
 
 /** Routine mensuelle par défaut (modifiable dans les réglages). */
 export const DEFAULT_ROUTINE: RoutinePhase[] = [
@@ -40,9 +40,13 @@ const hasTva = (c?: Client) => !!c && c.regimeTva !== 'franchise';
 /** Date d'échéance d'une période pour un mois donné (et un dossier, pour la TVA). */
 export function phaseDueDate(phase: RoutinePhase, month: string, client?: Client): string {
   if (phase.due === 'last') return lastWorkingDay(month);
-  if (phase.due === 'tva') return withDay(`${month}-01`, hasTva(client) ? client!.jourTva || 24 : 24);
-  return withDay(`${month}-01`, phase.due);
+  // Échéance sur un week-end ou un jour férié : avancée au jour ouvré précédent.
+  if (phase.due === 'tva') return workingOnOrBefore(withDay(`${month}-01`, hasTva(client) ? client!.jourTva || 24 : 24));
+  return workingOnOrBefore(withDay(`${month}-01`, phase.due));
 }
+
+/** Date de début d'une période : son premier jour, ou le jour ouvré suivant. */
+export const phaseStartDate = (phase: RoutinePhase, month: string) => workingOnOrAfter(withDay(`${month}-01`, phase.from));
 
 /** Tâches de la routine pour un mois (une par dossier et par période, plus les tâches globales). */
 export function routineTasks(month: string, clients: Client[], routine: RoutinePhase[], existingKeys: Set<string | null>): Task[] {
@@ -54,7 +58,7 @@ export function routineTasks(month: string, clients: Client[], routine: RoutineP
     if (existingKeys.has(key)) return;
     out.push({
       id: uid(), clientId, title, category: phase.category, priority: phase.id === 'tva' ? 'high' : 'normal', status: 'todo',
-      dueDate, startDate: withDay(`${month}-01`, phase.from), estimate: '', description: '', recurrence: '',
+      dueDate, startDate: phaseStartDate(phase, month), estimate: '', description: '', recurrence: '',
       checklist: steps.map(text => ({ id: uid(), text, done: false })),
       timeEntries: [], log: [{ at: now, type: 'system', text: `Créée depuis la routine du mois (${label})` }],
       createdAt: now, updatedAt: now, completedAt: null, waitingSince: null, key,

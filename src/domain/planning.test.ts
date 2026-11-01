@@ -94,8 +94,11 @@ describe('date de début des tâches de routine', () => {
     const tasks = routineTasks('2026-11', clients, DEFAULT_ROUTINE, new Set());
     const debut = tasks.find(t => t.title.startsWith('Début de mois'))!;
     const tva = tasks.find(t => t.title.startsWith('TVA'))!;
-    expect(startOf(debut, DEFAULT_ROUTINE)).toBe('2026-11-01');
-    expect(startOf({ ...tva, startDate: undefined }, DEFAULT_ROUTINE)).toBe('2026-11-18'); // ancienne tâche sans date
+    expect(startOf(debut, DEFAULT_ROUTINE)).toBe('2026-11-02'); // le 1er est un dimanche
+    expect(startOf({ ...tva, startDate: undefined }, DEFAULT_ROUTINE)).toBe('2026-11-18');
+    // échéances toujours sur un jour ouvré
+    const all = routineTasks('2027-01', clients, DEFAULT_ROUTINE, new Set());
+    expect(all.every(t => ![0, 6].includes(new Date(t.dueDate).getDay()) && ![0, 6].includes(new Date(t.startDate!).getDay()))).toBe(true); // ancienne tâche sans date
     expect(isStarted(debut, DEFAULT_ROUTINE, '2026-11-02')).toBe(true);
     expect(isStarted(tva, DEFAULT_ROUTINE, '2026-11-02')).toBe(false);
   });

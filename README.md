@@ -48,7 +48,7 @@ Le bouton **Tester le verrou** tente 4 envois (fetch, beacon, image, WebSocket) 
 
 ## Documentation
 
-- [`docs/nini-guide-complet.pdf`](docs/nini-guide-complet.pdf) : le guide complet, écran par écran, avec captures (28 pages).
+- [`docs/nini-guide-complet.pdf`](docs/nini-guide-complet.pdf) : le guide complet, écran par écran, avec captures (29 pages).
 - [`docs/nini-mode-emploi.pdf`](docs/nini-mode-emploi.pdf) : le mode d'emploi court (4 pages).
 
 Les sources LaTeX sont à côté. Pour compiler : `xelatex` (deux passes pour le sommaire). Les captures utilisent uniquement les données d'exemple.
