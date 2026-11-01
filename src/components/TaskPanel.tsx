@@ -250,7 +250,7 @@ function PanelContent({ task, isNew, title, desc, setTitle, setDesc, update }: {
           </Prop>
           <Prop label="Dossier">
             <select value={task.clientId} onChange={e => update({ clientId: e.target.value })}>
-              <option value="">Sans dossier</option>
+              <option value="">Aucun — à lier plus tard</option>
               {clients.map(c => <option key={c.id} value={c.id}>{c.name}{c.archived ? ' (archivé)' : ''}</option>)}
             </select>
           </Prop>

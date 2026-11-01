@@ -48,7 +48,7 @@ Le bouton **Tester le verrou** tente 4 envois (fetch, beacon, image, WebSocket) 
 
 ## Documentation
 
-- [`docs/nini-guide-complet.pdf`](docs/nini-guide-complet.pdf) : le guide complet, écran par écran, avec captures (26 pages).
+- [`docs/nini-guide-complet.pdf`](docs/nini-guide-complet.pdf) : le guide complet, écran par écran, avec captures (28 pages).
 - [`docs/nini-mode-emploi.pdf`](docs/nini-mode-emploi.pdf) : le mode d'emploi court (4 pages).
 
 Les sources LaTeX sont à côté. Pour compiler : `xelatex` (deux passes pour le sommaire). Les captures utilisent uniquement les données d'exemple.
@@ -56,9 +56,9 @@ Les sources LaTeX sont à côté. Pour compiler : `xelatex` (deux passes pour le
 ## Fonctionnalités
 
 - **Aujourd'hui** : retards, tâches du jour, les 7 prochains jours classés par date, tâches en attente du client (avec le nombre de jours depuis la relance).
-- **Toutes les tâches** : recherche et filtres (dossier, statut, échéance, catégorie, priorité), affichage en **liste** ou en **tableau** par statut avec glisser-déposer. Ajout rapide au clavier.
+- **Toutes les tâches** : recherche et filtres (dossier, statut, échéance, catégorie, priorité), **regroupement** repliable (par dossier, manager, période, statut, catégorie, priorité), affichage en **liste** ou en **tableau** par statut avec glisser-déposer. Ajout rapide au clavier, avec le choix du dossier lié. Les tâches sans dossier sont regroupées « à lier » et se rattachent depuis leur panneau.
 - **Panneau de tâche** : enregistrement automatique, statut, échéance, priorité, catégorie, estimation, **récurrence** (l'occurrence suivante est créée quand la tâche est terminée), **étapes**, **temps passé** (saisie libre « 1h30 » ou **chrono**), **fil d'activité** (commentaires et historique automatique des changements).
-- **Dossiers** : forme juridique, IS/IR, régime de TVA, clôture, paie, contact, honoraires, **budget temps**, notes ; avancement de l'année et retards par dossier ; archivage.
+- **Dossiers** : regroupement au choix (manager, régime de TVA, forme juridique, imposition), groupes repliables avec temps alloué et retards ; forme juridique, IS/IR, régime de TVA, clôture, paie, contact, honoraires, **budget temps**, notes ; avancement de l'année et retards par dossier ; archivage.
 - **Poser les échéances** : crée en un clic les tâches de l'année pour un ou plusieurs dossiers : TVA (CA3 mensuelle ou trimestrielle, acomptes et CA12), paie et DSN, collecte des pièces, révision, liasse (2065, 2031/2035, 2072), acomptes et solde d'IS, AG, dépôt au greffe, CFE. Une échéance déjà créée ne l'est jamais deux fois.
 - **Répartition du mois** : chaque dossier a un manager et un temps alloué (en jours par mois). L'app propose un planning jour par jour :
   - les dossiers ayant une période réservée (par exemple du 5 au 10) sont placés en premier ;

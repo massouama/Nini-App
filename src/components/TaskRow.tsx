@@ -42,6 +42,7 @@ export function TaskRow({ task, showClient = true, extra, clientAsTitle = false 
   const running = settings.timer?.taskId === task.id;
   const meta: ReactNode[] = [];
   if (showClient && client && !clientAsTitle) meta.push(client.name);
+  if (showClient && !client) meta.push(task.key?.startsWith('routine|') ? 'Tâche générale' : <span className="unlinked">Sans dossier</span>);
   if (!clientAsTitle) meta.push(task.category);
   if (task.checklist.length) meta.push(`${ckDone}/${task.checklist.length} étapes`);
   if (spent) meta.push(fmtMin(spent));
