@@ -54,7 +54,7 @@ export function routineTasks(month: string, clients: Client[], routine: RoutineP
     if (existingKeys.has(key)) return;
     out.push({
       id: uid(), clientId, title, category: phase.category, priority: phase.id === 'tva' ? 'high' : 'normal', status: 'todo',
-      dueDate, estimate: '', description: '', recurrence: '',
+      dueDate, startDate: withDay(`${month}-01`, phase.from), estimate: '', description: '', recurrence: '',
       checklist: steps.map(text => ({ id: uid(), text, done: false })),
       timeEntries: [], log: [{ at: now, type: 'system', text: `Créée depuis la routine du mois (${label})` }],
       createdAt: now, updatedAt: now, completedAt: null, waitingSince: null, key,

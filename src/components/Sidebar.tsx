@@ -1,10 +1,11 @@
-import { CalendarDays, CalendarRange, Cloud, DownloadCloud, FileText, FolderOpen, HardDrive, ListTodo, Pause, Plus, Search, Settings, Sun } from 'lucide-react';
-import { NavLink } from 'react-router-dom';
+import { CalendarDays, CalendarRange, ChevronRight, Cloud, DownloadCloud, FileText, FolderOpen, HardDrive, ListTodo, Pause, Plus, Search, Settings, Sun } from 'lucide-react';
+import { NavLink, useLocation } from 'react-router-dom';
+import { usePref } from '../lib/usePref';
 import { useData, useStore } from '../data/StoreContext';
 import { today } from '../lib/dates';
 import { fmtClock, fmtMin } from '../lib/format';
 import { clientStats } from '../domain/stats';
-import { clientCode, isOpen, isOverdue } from '../domain/tasks';
+import { clientCode, isOpen, isOverdue, isStarted } from '../domain/tasks';
 import { useToast } from './ui/Toasts';
 import { useBackup } from './useBackup';
 import { managerColor, managersOf } from './managers';
@@ -20,7 +21,9 @@ export function Sidebar({ onSearch, open, onNavigate }: { onSearch: () => void; 
   const timerTask = settings.timer ? tasks.find(t => t.id === settings.timer!.taskId) : undefined;
   const now = useNow(!!timerTask);
   const backup = useBackup();
-  const todayCount = tasks.filter(t => isOpen(t) && t.dueDate && t.dueDate <= ref).length;
+  const location = useLocation();
+  const [folds, setFolds] = usePref<{ open: Record<string, boolean> }>('sidebar', { open: {} });
+  const todayCount = tasks.filter(t => isOpen(t) && t.status !== 'waiting' && ((t.dueDate && t.dueDate <= ref) || isStarted(t, settings.routine, ref))).length;
   const lateCount = tasks.filter(t => isOverdue(t, ref)).length;
   const active = clients.filter(c => !c.archived).sort((a, b) => a.name.localeCompare(b.name, 'fr'));
   const groups = [
@@ -52,20 +55,35 @@ export function Sidebar({ onSearch, open, onNavigate }: { onSearch: () => void; 
       </nav>
 
       <div className="side-clients">
-        {groups.map(g => (
-          <div key={g.name} className="side-group">
-            {groups.length > 1 && <div className="side-group-title"><i style={{ background: g.color }} />{g.name}</div>}
-            {g.list.map(c => {
-              const st = clientStats(c, tasks);
-              return (
-                <NavLink key={c.id} to={`/dossiers/${c.id}`} className="nav-link client-link" onClick={onNavigate}>
-                  <span className="code">{clientCode(c)}</span><span className="ellipsis">{c.name}</span>
-                  {st.overdue ? <b className="nav-count late">{st.overdue}</b> : st.open.length ? <b className="nav-count">{st.open.length}</b> : null}
-                </NavLink>
-              );
-            })}
-          </div>
-        ))}
+        {groups.map(g => {
+          const stats = g.list.map(c => clientStats(c, tasks));
+          const late = stats.reduce((n, st) => n + st.overdue, 0);
+          const containsCurrent = g.list.some(c => location.pathname === `/dossiers/${c.id}`);
+          const opened = groups.length === 1 || (folds.open[g.name] ?? false) || containsCurrent;
+          return (
+            <div key={g.name} className={`side-group ${opened ? 'opened' : ''}`}>
+              {groups.length > 1 && (
+                <button className="side-group-title" aria-expanded={opened}
+                  onClick={() => setFolds(f => ({ open: { ...f.open, [g.name]: !opened } }))}>
+                  <ChevronRight size={13} className="chev" />
+                  <i style={{ background: g.color }} />
+                  <span className="ellipsis">{g.name}</span>
+                  <span className="side-group-count">{g.list.length}</span>
+                  {late > 0 && <b className="nav-count late" title="Tâches en retard">{late}</b>}
+                </button>
+              )}
+              {opened && g.list.map((c, i) => {
+                const st = stats[i];
+                return (
+                  <NavLink key={c.id} to={`/dossiers/${c.id}`} className="nav-link client-link" onClick={onNavigate}>
+                    <span className="code">{clientCode(c)}</span><span className="ellipsis">{c.name}</span>
+                    {st.overdue ? <b className="nav-count late">{st.overdue}</b> : st.open.length ? <b className="nav-count">{st.open.length}</b> : null}
+                  </NavLink>
+                );
+              })}
+            </div>
+          );
+        })}
       </div>
 
       <div className="side-bottom">

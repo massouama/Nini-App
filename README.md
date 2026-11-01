@@ -46,6 +46,13 @@ L'app ne se connecte jamais à rien. Une fois installée, elle est servie unique
 
 Le bouton **Tester le verrou** tente 4 envois (fetch, beacon, image, WebSocket) vers un domaine réservé `.invalid`, qui n'existe pas. Chaque canal doit apparaître « bloqué ». Le journal s'exporte en CSV. Vérification indépendante : outils de développement (F12 → Réseau) sur PC, mode avion sur iPad.
 
+## Documentation
+
+- [`docs/nini-guide-complet.pdf`](docs/nini-guide-complet.pdf) : le guide complet, écran par écran, avec captures (26 pages).
+- [`docs/nini-mode-emploi.pdf`](docs/nini-mode-emploi.pdf) : le mode d'emploi court (4 pages).
+
+Les sources LaTeX sont à côté. Pour compiler : `xelatex` (deux passes pour le sommaire). Les captures utilisent uniquement les données d'exemple.
+
 ## Fonctionnalités
 
 - **Aujourd'hui** : retards, tâches du jour, les 7 prochains jours classés par date, tâches en attente du client (avec le nombre de jours depuis la relance).

@@ -13,14 +13,14 @@ import { addDays, fmtDate, today } from '../lib/dates';
 import { fmtMin } from '../lib/format';
 import { usePref } from '../lib/usePref';
 import { CATEGORIES, PRIORITIES, PRIO_RANK, STATUSES } from '../domain/constants';
-import { byDue, clientCode, isOverdue, timeSpent } from '../domain/tasks';
+import { byDue, clientCode, isOverdue, isStarted, timeSpent } from '../domain/tasks';
 import type { Status, Task } from '../domain/types';
 
 interface Filters { client: string; status: string; due: string; category: string; priority: string; sort: string; view: 'list' | 'board' }
 const DEFAULTS: Filters = { client: '', status: 'open', due: '', category: '', priority: '', sort: 'due', view: 'list' };
 
 export function TasksPage() {
-  const { tasks, clients } = useData();
+  const { tasks, clients, settings } = useData();
   const [f, setF] = usePref<Filters>('tasks', DEFAULTS);
   const [q, setQ] = useState('');
   const [params, setParams] = useSearchParams();
@@ -47,6 +47,7 @@ export function TasksPage() {
       if (f.category && t.category !== f.category) return false;
       if (f.priority && t.priority !== f.priority) return false;
       const d = t.dueDate;
+      if (f.due === 'started' && !isStarted(t, settings.routine, ref)) return false;
       if (f.due === 'overdue' && !isOverdue(t, ref)) return false;
       if (f.due === 'today' && d !== ref) return false;
       if (f.due === 'week' && !(d && d >= ref && d <= addDays(ref, 7))) return false;
@@ -65,7 +66,7 @@ export function TasksPage() {
       updated: (a, b) => b.updatedAt - a.updatedAt,
     };
     return list.sort(sorts[f.sort] ?? byDue);
-  }, [tasks, clients, f, q, ref]);
+  }, [tasks, clients, settings.routine, f, q, ref]);
 
   const set = (patch: Partial<Filters>) => setF(prev => ({ ...prev, ...patch }));
   const isFiltered = JSON.stringify({ ...f, view: 'list' }) !== JSON.stringify({ ...DEFAULTS, view: 'list' }) || q;
@@ -98,6 +99,7 @@ export function TasksPage() {
         )}
         <select className={f.due ? 'set' : ''} value={f.due} onChange={e => set({ due: e.target.value })}>
           <option value="">Toutes échéances</option>
+          <option value="started">À traiter en ce moment</option>
           <option value="overdue">En retard</option>
           <option value="today">Aujourd’hui</option>
           <option value="week">7 prochains jours</option>

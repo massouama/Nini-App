@@ -91,7 +91,7 @@ export function SettingsPage({ email }: { email?: string }) {
         <RoutineEditor />
       </Section>
 
-      <Section title="Synchronisation">
+      <Section title="Stockage">
         {store.repo.kind === 'supabase' ? (
           <div className="setting-row">
             <Cloud size={18} />
@@ -101,9 +101,9 @@ export function SettingsPage({ email }: { email?: string }) {
         ) : (
           <div className="setting-row">
             <HardDrive size={18} />
-            <div><b>Données dans ce navigateur</b>
-              <p className="muted small">Rien ne quitte cet appareil ({(size / 1024).toFixed(0)} Ko). Pour retrouver les mêmes données sur ordinateur et téléphone,
-                configure une base Supabase : la marche à suivre est dans le fichier README du projet.</p></div>
+            <div><b>Données dans ce navigateur, sur cet appareil</b>
+              <p className="muted small">Rien ne quitte cet appareil ({(size / 1024).toFixed(0)} Ko). Pour passer sur un autre appareil :
+                exporte une sauvegarde ici, transporte le fichier, puis restaure-le là-bas.</p></div>
           </div>
         )}
       </Section>

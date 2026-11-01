@@ -1,0 +1,606 @@
+% Nini — guide complet d'utilisation
+% Compiler avec XeLaTeX (polices Inter et DejaVu installées), deux passes pour le sommaire :
+%   xelatex nini-guide-complet.tex && xelatex nini-guide-complet.tex
+% Les captures d'écran (dossier images/) utilisent uniquement les données d'exemple de l'app.
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[french]{babel}
+\usepackage{fontspec}
+\setmainfont{Inter}[
+  UprightFont = *-Regular, BoldFont = *-SemiBold,
+  ItalicFont = *-Italic, BoldItalicFont = *-SemiBoldItalic, Extension = .otf ]
+\newfontfamily\displayfont{InterDisplay}[UprightFont = *-Bold, BoldFont = *-Bold, Extension = .otf]
+\setmonofont{DejaVu Sans Mono}[Scale=0.85]
+\newfontfamily\symb{DejaVu Sans}
+
+\usepackage[a4paper, margin=21mm, top=19mm, bottom=23mm]{geometry}
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage{microtype}
+\usepackage{enumitem}
+\usepackage{tabularx}
+\usepackage{colortbl}
+\usepackage{titlesec}
+\usepackage{titletoc}
+\usepackage{needspace}
+\usepackage{fancyhdr}
+\usepackage{tikz}
+\usetikzlibrary{babel}
+\usepackage[most]{tcolorbox}
+\usepackage[hidelinks, pdftitle={Nini, guide complet}, pdfauthor={Nini}]{hyperref}
+
+% ---------- Couleurs (celles de l'app) ----------
+\definecolor{accent}{HTML}{3355FF}
+\definecolor{accentsoft}{HTML}{EEF1FF}
+\definecolor{ink}{HTML}{17171C}
+\definecolor{ink2}{HTML}{52525C}
+\definecolor{line}{HTML}{E2E3E9}
+\definecolor{soft}{HTML}{F5F6F9}
+\definecolor{ok}{HTML}{1D9A61}
+\definecolor{oksoft}{HTML}{E9F7F0}
+\definecolor{no}{HTML}{D93F45}
+\definecolor{nosoft}{HTML}{FDEEEE}
+\definecolor{amber}{HTML}{B8780A}
+\definecolor{ambersoft}{HTML}{FFF5E3}
+\definecolor{pink}{HTML}{E0569A}
+\color{ink}
+
+% ---------- Mise en page ----------
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt}
+\linespread{1.15}
+\setcounter{secnumdepth}{2}
+\setcounter{tocdepth}{1}
+\titleformat{\section}{\needspace{12\baselineskip}\displayfont\fontsize{19}{23}\selectfont}
+  {\color{accent}\thesection}{10pt}{}
+\titlespacing*{\section}{0pt}{26pt}{10pt}
+\titleformat{\subsection}{\needspace{7\baselineskip}\bfseries\large}{}{0pt}{}
+\titlespacing*{\subsection}{0pt}{16pt}{6pt}
+\titlecontents{section}[1.8em]{\addvspace{1pt}}{\contentslabel{1.8em}}{}{\titlerule*[0.6pc]{.}\contentspage}
+\titlecontents{subsection}[3.6em]{\small\color{ink2}}{\contentslabel{1.8em}}{}{\titlerule*[0.6pc]{.}\contentspage}
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+\fancyfoot[L]{\small\color{ink2}Nini · guide complet}
+\fancyfoot[R]{\small\color{ink2}\thepage}
+
+% ---------- Composants ----------
+\newcommand{\muted}[1]{{\color{ink2}#1}}
+\newcommand{\btn}[1]{\textbf{#1}}
+\newcommand{\kbd}[1]{\tcbox[on line, boxsep=0pt, left=3pt, right=3pt, top=1.5pt, bottom=1.5pt,
+  colback=soft, colframe=line, boxrule=0.5pt, arc=2pt]{\ttfamily\small #1}}
+\newcommand{\pastille}[1]{\tcbox[on line, boxrule=0pt, colback=accentsoft, colframe=accentsoft, arc=8pt,
+  boxsep=0pt, left=4.5pt, right=4.5pt, top=3pt, bottom=3pt]{\makebox[0.62em]{\small\bfseries\color{accent}#1}}}
+\newlist{etapes}{enumerate}{1}
+\setlist[etapes]{label=\pastille{\arabic*}, leftmargin=28pt, labelsep=8pt, itemsep=4pt, topsep=4pt}
+\setlist[itemize]{leftmargin=16pt, itemsep=2pt, topsep=3pt, label={\color{accent}\textbullet}}
+
+\newcommand{\capture}[3][0.9\linewidth]{% largeur, fichier, légende (gardées ensemble)
+  \par\medskip\noindent\begin{minipage}{\linewidth}\centering
+  \begin{tcolorbox}[enhanced, width=#1, boxrule=0.5pt, colframe=line, colback=white, arc=5pt,
+    left=0pt, right=0pt, top=0pt, bottom=0pt, boxsep=0pt, before skip=0pt, after skip=3pt]
+    \includegraphics[width=\linewidth]{images/#2}
+  \end{tcolorbox}
+  {\footnotesize\muted{#3}}
+  \end{minipage}\par\medskip}
+
+\newtcolorbox{astuce}{enhanced, colback=accentsoft, colframe=accentsoft, arc=7pt, boxrule=0pt,
+  left=11pt, right=11pt, top=7pt, bottom=7pt, before skip=8pt, after skip=8pt,
+  fontupper=\small, before upper={\textbf{\color{accent}Astuce\enspace}}}
+\newtcolorbox{attention}{enhanced, colback=ambersoft, colframe=ambersoft, arc=7pt, boxrule=0pt,
+  left=11pt, right=11pt, top=7pt, bottom=7pt, before skip=8pt, after skip=8pt,
+  fontupper=\small, before upper={\textbf{\color{amber}Attention\enspace}}}
+\newtcolorbox{securite}{enhanced, colback=oksoft, colframe=oksoft, arc=7pt, boxrule=0pt,
+  left=11pt, right=11pt, top=8pt, bottom=8pt, before skip=8pt, after skip=8pt}
+
+% Tableau à deux colonnes : terme / explication
+\newenvironment{lexique}[1][0.28]
+  {\par\renewcommand{\arraystretch}{1.45}\arrayrulecolor{line}%
+   \tabularx{\linewidth}{@{}>{\bfseries\raggedright\arraybackslash}p{#1\linewidth}>{\raggedright\arraybackslash\leavevmode\color{ink2}}X@{}}\hline}
+  {\endtabularx\par}
+
+\begin{document}
+
+% =====================================================================
+% Couverture
+% =====================================================================
+\thispagestyle{empty}
+\begin{tikzpicture}
+  \node[fill=accent, rounded corners=7pt, minimum size=15mm, text=white, font=\displayfont\fontsize{25}{25}\selectfont] {N};
+\end{tikzpicture}
+
+\vspace{10pt}
+{\displayfont\fontsize{36}{40}\selectfont Nini\par}
+\vspace{2pt}
+{\displayfont\fontsize{22}{26}\selectfont\color{ink2} Le guide complet\par}
+\vspace{10pt}
+{\large\muted{Tout ce qu’il faut savoir pour suivre tes dossiers, organiser ton mois et garder tes données en sécurité.}\par}
+
+\vspace{14pt}
+\begin{securite}
+\textbf{À retenir avant tout.}\enspace Nini ne se connecte jamais à Internet : tes données restent sur ton appareil.
+En contrepartie, \textbf{c’est toi qui fais les sauvegardes}, chaque vendredi.
+\end{securite}
+
+\vspace{6pt}
+{\small\muted{Les captures d’écran de ce guide montrent des dossiers d’exemple, pas tes vrais clients.}}
+
+\vspace{14pt}
+{\displayfont\fontsize{15}{18}\selectfont Sommaire\par}
+\vspace{2pt}
+{\makeatletter\@starttoc{toc}\makeatother}
+
+\newpage
+
+% =====================================================================
+\section{Nini en bref}
+% =====================================================================
+Nini est ton carnet de travail de collaboratrice comptable. Tu y retrouves :
+\begin{itemize}
+  \item \textbf{tes dossiers clients}, rangés par manager, avec le temps prévu pour chacun ;
+  \item \textbf{les tâches du mois}, créées automatiquement pour chaque dossier, avec des étapes à cocher ;
+  \item \textbf{ton planning}, qui répartit tes journées entre les dossiers ;
+  \item \textbf{des rapports} sur ce qui est fait et ce qui reste à faire.
+\end{itemize}
+
+\subsection{Les mots à connaître}
+\begin{lexique}
+Dossier & Un client du cabinet (une société, une SCI…). Chaque dossier a un code court, par exemple \texttt{BOUM}. \\ \hline
+Manager & La personne responsable du dossier. Les dossiers sont regroupés par manager. \\ \hline
+Tâche & Un travail à faire : « Début de mois », « TVA \& révision »… \\ \hline
+Étapes & La liste à cocher à l’intérieur d’une tâche : intégration banque, lettrage… \\ \hline
+Période & Un moment du mois : début, milieu, TVA, fin. Chaque période a ses tâches. \\ \hline
+Date de début & Le jour où la tâche apparaît dans « À traiter en ce moment ». \\ \hline
+Échéance & La date à laquelle la tâche doit être finie. \\ \hline
+Répartition & Le planning du mois : quel dossier, quel jour, combien de temps. \\ \hline
+Créneau & Un bloc du planning : un dossier, un jour, une durée (1 h, 0,5 j…). \\ \hline
+Sauvegarde & Un fichier qui contient toutes tes données, pour les protéger ou les transporter. \\ \hline
+\end{lexique}
+
+% =====================================================================
+\section{Ouvrir Nini}
+% =====================================================================
+\subsection{Sur l’ordinateur}
+\begin{etapes}
+  \item Copie le fichier \btn{Nini.html} dans tes \btn{Documents}. Ne le déplace plus ensuite.
+  \item Double-clique dessus : il s’ouvre dans \btn{Edge} ou \btn{Chrome}.
+  \item Ajoute la page à tes favoris pour la retrouver en un clic.
+\end{etapes}
+\begin{attention}
+Ouvre toujours Nini de la même façon : même fichier, même endroit, même navigateur.
+Sinon, le navigateur ne retrouve pas tes données.
+\end{attention}
+
+\subsection{Sur l’iPad}
+L’iPad ne sait pas ouvrir un fichier \texttt{.html}. On installe donc Nini comme une app, une seule fois (voir la partie \ref{sec:ipad}).
+
+\subsection{La première fois}
+\capture[0.68\linewidth]{00-bienvenue.jpg}{L’écran d’accueil quand Nini est vide.}
+Trois possibilités :
+\begin{itemize}
+  \item \btn{Créer un premier dossier} pour partir de zéro ;
+  \item \btn{Explorer avec des données d’exemple} pour découvrir l’app sans risque ;
+  \item ou, le plus courant, \btn{importer tes dossiers} à partir du fichier de sauvegarde que tu as reçu :
+  menu \btn{Réglages} → \btn{Restaurer…} → choisis le fichier \texttt{.json}.
+\end{itemize}
+\begin{astuce}
+Après avoir essayé les données d’exemple, va dans \btn{Réglages → Tout effacer}, puis restaure ta sauvegarde.
+\end{astuce}
+
+% =====================================================================
+\section{L’écran principal}
+% =====================================================================
+\capture{01-accueil.jpg}{À gauche, la barre latérale. À droite, la page ouverte (ici : Aujourd’hui).}
+
+La \textbf{barre latérale}, à gauche, est toujours là :
+\begin{lexique}[0.3]
+Rechercher & Ouvre la palette de recherche (aussi avec \kbd{Ctrl}+\kbd{K}) : retrouve une tâche ou un dossier en tapant quelques lettres. \\ \hline
+Nouvelle tâche & Crée une tâche (aussi avec la touche \kbd{N}). \\ \hline
+Aujourd’hui & Ta journée : ce qui est prévu, ce qui est en retard, ce qui est à traiter. Le chiffre indique le nombre de tâches à traiter. \\ \hline
+Toutes les tâches & La liste complète, avec des filtres. \\ \hline
+Répartition & Le planning du mois. \\ \hline
+Calendrier & Les échéances sur un calendrier. \\ \hline
+Rapports & Le bilan de ce qui est fait et de ce qui reste. \\ \hline
+Dossiers & La liste de tes clients. \\ \hline
+Groupes par manager & En dessous, tes dossiers rangés par manager. Clique sur le nom d’un manager pour \textbf{déplier ou replier} sa liste. Le chiffre gris indique le nombre de dossiers, le chiffre rouge les retards. \\ \hline
+Sauvegarde conseillée & Ce cadre jaune apparaît après 7 jours sans sauvegarde. Clique sur \btn{Sauvegarder}. \\ \hline
+Chrono & Quand un chrono tourne, il s’affiche en bas, avec un bouton pour l’arrêter. \\ \hline
+Réglages & Sauvegardes, routine du mois, sécurité. \\ \hline
+\end{lexique}
+
+% =====================================================================
+\section{Aujourd’hui}
+% =====================================================================
+C’est la page à ouvrir chaque matin. De haut en bas :
+\begin{lexique}[0.3]
+Le résumé & Sous le titre : le nombre de tâches en retard, à traiter, pour aujourd’hui, dans les 7 jours, et chez le client. Clique dessus pour voir la liste. \\ \hline
+Au programme aujourd’hui & Les dossiers prévus ce jour dans ta répartition, avec la durée et l’avancement des étapes (par exemple « 1 h · 2/8 »). Un clic ouvre directement la bonne tâche. La période en cours est rappelée juste au-dessus. \\ \hline
+À reprendre & Les tâches que tu avais reportées et dont la date de reprise est arrivée. \btn{Reprendre} les remet en cours ; \btn{Reporter encore} rouvre la tâche pour choisir une autre date. \\ \hline
+En retard & Les tâches dont l’échéance est passée. \\ \hline
+Aujourd’hui & Les tâches à finir aujourd’hui, et un champ pour en ajouter une. \\ \hline
+À traiter en ce moment & Toutes les tâches de la période en cours, groupées. Pour chaque groupe : la date de fin et le nombre de tâches terminées. \\ \hline
+Les 7 prochains jours & Les échéances de la semaine, jour par jour. \\ \hline
+En attente du client & Les tâches bloquées parce qu’il manque quelque chose au client, avec le nombre de jours depuis la relance. \\ \hline
+\end{lexique}
+\begin{astuce}
+Le rond à gauche d’une tâche sert à la cocher. Si tu te trompes, clique sur \btn{Annuler} dans le message qui apparaît en bas.
+\end{astuce}
+
+% =====================================================================
+\section{Travailler une tâche}
+% =====================================================================
+Clique sur une tâche : elle s’ouvre dans un panneau à droite. \textbf{Tout s’enregistre tout seul}, il n’y a pas de bouton « Enregistrer ».
+
+\capture{02-panneau.jpg}{Le panneau d’une tâche : titre, informations, étapes.}
+
+\subsection{Les informations}
+\begin{lexique}
+Statut & \textbf{À faire}, \textbf{En cours}, \textbf{En attente client} (il manque une pièce), \textbf{Terminé}. Passer en « En attente » démarre le compteur de jours depuis la relance. \\ \hline
+Début & Le jour où la tâche apparaît dans « À traiter en ce moment ». \\ \hline
+Échéance & La date de fin. À droite, Nini indique « dans 3 j », « demain » ou « en retard ». \\ \hline
+Dossier & Le client concerné. \\ \hline
+Priorité & Urgente, Haute, Normale, Basse. Les tâches urgentes ont un rond rouge, les hautes un rond orange. \\ \hline
+Catégorie & Saisie, TVA, Révision… Elle sert aux filtres et aux rapports. \\ \hline
+Estimation & Le temps prévu, en heures. \\ \hline
+Récurrence & Chaque semaine, mois, trimestre ou année : quand tu termines la tâche, Nini crée la suivante toute seule. \\ \hline
+\end{lexique}
+Sous les informations, une zone libre pour tes \textbf{notes} : pièces manquantes, consignes…
+
+\subsection{Les étapes}
+Coche chaque étape quand elle est faite. La barre bleue montre l’avancement.
+Pour ajouter une étape, écris dans \btn{+ Ajouter une étape} puis appuie sur \kbd{Entrée}.
+Pour en supprimer une, passe la souris dessus et clique sur la croix.
+
+\capture{03-panneau-suite.jpg}{Plus bas dans le panneau : le temps passé et l’activité.}
+
+\subsection{Le temps passé}
+Deux façons de noter ton temps :
+\begin{itemize}
+  \item \textbf{le chrono} : bouton \btn{Chrono} en haut du panneau. Il continue même si tu changes de page. Arrête-le avec le même bouton, ou en bas de la barre latérale : le temps s’ajoute tout seul ;
+  \item \textbf{à la main} : choisis la date, écris la durée (\texttt{1h30}, \texttt{45}, \texttt{0:30}…), une note si tu veux, puis \btn{Ajouter}.
+\end{itemize}
+
+\subsection{L’activité}
+Écris un commentaire (appel client, relance…) puis \btn{Publier}. Nini note aussi tout seul les changements importants : statut, échéance, priorité, temps ajouté. C’est l’historique de la tâche.
+
+\subsection{Les boutons du haut}
+\begin{lexique}
+Chrono & Démarre ou arrête le chrono de cette tâche. \\ \hline
+Reporter & Met la tâche de côté jusqu’à une date de reprise (voir ci-dessous). \\ \hline
+Dupliquer & Crée une copie de la tâche, avec les mêmes étapes, toutes décochées. \\ \hline
+Supprimer & Supprime la tâche. Un message propose \btn{Annuler} pendant quelques secondes. \\ \hline
+Fermer & La croix, ou la touche \kbd{Échap}. \\ \hline
+\end{lexique}
+
+\subsection{Reporter une tâche bloquée}
+Le client n’a pas envoyé ses pièces à temps ? Tu reportes la tâche et tu prends autre chose à la place.
+\begin{etapes}
+  \item Ouvre la tâche, puis clique sur \btn{Reporter} en haut du panneau.
+  \item Choisis la raison : pièces manquantes du client, attente du manager, ou autre.
+  \item Choisis la date de reprise : \btn{Demain}, \btn{Dans 3 jours ouvrés}, \btn{Lundi prochain}, \btn{Dans 2 semaines}, ou une date au choix.
+  \item Si besoin, change l’échéance et précise ce qui manque (« relevés bancaires d’octobre »).
+  \item Laisse cochées les deux options : la tâche passe \textbf{En attente client}, et les créneaux prévus pour ce dossier d’ici la reprise sont \textbf{libérés} dans la répartition.
+  \item Clique sur \btn{Reporter au …}.
+\end{etapes}
+\capture[0.8\linewidth]{19-reporter.jpg}{La fenêtre « Reporter la tâche ».}
+\begin{attention}
+Si la reprise tombe après l’échéance, Nini l’affiche en orange : préviens le manager du dossier, ou repousse l’échéance si c’est possible.
+Les échéances légales (TVA…) ne se repoussent pas.
+\end{attention}
+
+\textbf{Ensuite, Nini te propose quoi faire à la place} :
+\begin{itemize}
+  \item \textbf{Disponibles maintenant} : les tâches des autres dossiers que tu peux traiter tout de suite, les plus urgentes d’abord ;
+  \item \textbf{À avancer} : les tâches des périodes suivantes que tu peux commencer en avance.
+\end{itemize}
+Les autres tâches du dossier bloqué ne sont pas proposées : elles attendent sans doute les mêmes pièces.
+Clique sur \btn{Prendre} : si du temps a été libéré aujourd’hui, il est donné à ce dossier dans ta répartition, et la tâche s’ouvre.
+\capture[0.8\linewidth]{20-a-la-place.jpg}{« Que faire à la place ? » : un clic sur Prendre.}
+\begin{astuce}
+Le jour de la reprise, la tâche réapparaît en haut de l’accueil, dans \btn{À reprendre}.
+Tu peux aussi la reprendre plus tôt : ouvre-la et clique sur \btn{Reprendre maintenant} dans le bandeau orange.
+Les jours libérés restent libres dans la répartition : tu peux y ajouter un créneau avec \btn{+ Ajouter}.
+\end{astuce}
+
+\subsection{Créer une tâche}
+Trois façons :
+\begin{itemize}
+  \item le bouton bleu \btn{Nouvelle tâche}, ou la touche \kbd{N} : écris le titre, la tâche est créée ;
+  \item le champ \btn{Ajouter une tâche…} en haut des listes : écris le titre puis \kbd{Entrée} ;
+  \item dans le calendrier : clique sur un jour.
+\end{itemize}
+
+% =====================================================================
+\section{Toutes les tâches}
+% =====================================================================
+\capture{04-taches.jpg}{La liste de toutes les tâches, avec les filtres en haut.}
+Les filtres se combinent : dossier, statut, échéance (en retard, à traiter en ce moment, cette semaine…), catégorie, priorité.
+Un filtre actif s’affiche en bleu. \btn{Effacer les filtres} remet tout à zéro. Le champ \btn{Filtrer…} cherche dans les titres, les notes et les noms de dossiers.
+
+\subsection{La vue Tableau}
+\capture{05-tableau.jpg}{La vue Tableau : une colonne par statut.}
+Clique sur \btn{Tableau} en haut à droite. Pour changer le statut d’une tâche, \textbf{fais glisser sa carte} dans une autre colonne.
+La colonne « Terminé » montre les 14 derniers jours.
+
+% =====================================================================
+\section{Organiser le mois : la routine et la répartition}
+% =====================================================================
+\subsection{Le mois type}
+Chaque dossier passe par quatre périodes. Nini crée une tâche par dossier et par période, avec ses étapes :
+
+\begin{tikzpicture}[x=0.995\linewidth/31]
+  \def\h{3.05}
+  \fill[accentsoft, rounded corners=6pt] (0,0) rectangle (10,\h);
+  \fill[white] (10,0) rectangle (17,\h);
+  \fill[ambersoft] (17,0) rectangle (24,\h);
+  \fill[white, rounded corners=6pt] (24,0) rectangle (31,\h);
+  \draw[line, rounded corners=6pt, line width=0.6pt] (0,0) rectangle (31,\h);
+  \foreach \x in {10,17,24} \draw[line, line width=0.6pt] (\x,0) -- (\x,\h);
+  \newcommand{\periode}[5]{%
+    \node[anchor=north west, text width=#2*\linewidth/31-14pt, align=left, inner sep=0pt] at (#1+0.35,\h-0.18) {%
+      {\ttfamily\small\color{ink2}#3}\\[2pt]\textbf{#4}\\[2pt]{\footnotesize\color{ink2}#5}};}
+  \periode{0}{10}{1 → 10}{Début de mois}{Banque, recettes, lettrage, 471, balance. À finir avant le 17.}
+  \periode{10}{7}{11 → 17}{Milieu}{Achats, paie, OD, états manquants.}
+  \periode{17}{7}{18 → 24}{TVA}{Déclarations du 19, du 21 et du 24. Révision.}
+  \periode{24}{7}{25 → fin}{Fin de mois}{Tableaux de bord, finalisation, point manager.}
+  \fill[pink, rounded corners=1.5pt] (4,-0.5) rectangle (10,-0.36);
+  \node[anchor=west, font=\footnotesize, text=ink2] at (10.3,-0.43) {Du 5 au 10 : semaine réservée au dossier qui a une période réservée.};
+\end{tikzpicture}
+
+En fin de mois, Nini crée aussi le \textbf{tableau de variation du CA} et un \textbf{point dossiers} pour chaque manager, avec la liste de ses dossiers.
+
+\subsection{Le 1\textsuperscript{er} jour de chaque mois}
+\begin{etapes}
+  \item Ouvre \btn{Répartition}.
+  \item Clique sur \btn{Créer les tâches du mois}. Si tu cliques deux fois, rien n’est créé en double.
+  \item Clique sur \btn{Proposer une répartition}.
+  \item Regarde le planning et ajuste ce qui ne te convient pas.
+\end{etapes}
+
+\capture{06-repartition.jpg}{La répartition du mois : un bloc par dossier et par jour, l’équilibre à droite.}
+
+\subsection{Lire le planning}
+\begin{itemize}
+  \item \textbf{Une case = un jour ouvré}. Les jours fériés sont grisés.
+  \item En haut de chaque case : la \textbf{période} et le temps total du jour (« 1 j », ou « 0,25 j libre »). En rouge si la journée dépasse 1 jour.
+  \item \textbf{Chaque bloc} : le code du dossier, son nom et la durée. La couleur du bord indique le manager.
+  \item En haut de la page : le nombre de jours ouvrés du mois, le temps alloué et la marge.
+\end{itemize}
+
+\subsection{Modifier le planning}
+\begin{itemize}
+  \item \textbf{Déplacer} : fais glisser un bloc vers un autre jour.
+  \item \textbf{Changer} : clique sur un bloc pour choisir un autre dossier, un autre jour, une autre durée ou une autre période. Le bouton \btn{Supprimer} est en bas à gauche.
+  \item \textbf{Ajouter} : passe la souris sur un jour qui n’est pas plein, puis clique sur \btn{+ Ajouter}.
+  \item \textbf{Tout recalculer} : \btn{Nouvelle proposition}. Attention, cela remplace tes modifications du mois.
+  \item \textbf{Autre mois} : les flèches en haut à droite.
+\end{itemize}
+\capture[0.7\linewidth]{07-creneau.jpg}{La fenêtre d’un créneau : dossier, jour, durée, période.}
+
+\subsection{L’équilibre par dossier}
+À droite du planning, chaque dossier montre son \textbf{temps alloué} par mois. Tu peux le modifier directement dans la case.
+À côté, l’\textbf{écart} : \textcolor{ok}{\symb ✓} si le planning correspond, \textcolor{amber}{+} s’il y a trop de temps prévu, \textcolor{no}{−} s’il en manque.
+
+\subsection{Comment Nini propose la répartition}
+\begin{itemize}
+  \item Le dossier qui a une \textbf{période réservée} (par exemple du 5 au 10) est placé en premier sur ces jours. Si un jour est férié, il continue le jour ouvré suivant.
+  \item Le temps de chaque autre dossier est \textbf{réparti sur les quatre périodes}, pour que chaque dossier soit traité à chaque étape du mois.
+  \item Les petits dossiers passent d’abord en début de mois (la banque), puis en TVA.
+  \item En période TVA, les dossiers dont la date limite est au \textbf{19} passent avant ceux au 21, puis au 24. Un dossier sans TVA n’y est jamais placé.
+  \item Les dossiers d’un même manager sont regroupés.
+\end{itemize}
+
+\subsection{Modifier la routine}
+Les périodes, leurs dates et leurs étapes se modifient dans \btn{Réglages → Routine mensuelle} (voir la partie \ref{sec:reglages}).
+
+% =====================================================================
+\section{Les dossiers}
+% =====================================================================
+\capture{08-dossiers.jpg}{La liste des dossiers.}
+Pour chaque dossier : le manager, le temps alloué, l’avancement des échéances de l’année, les tâches ouvertes et en retard, la prochaine échéance et le temps passé.
+Coche \btn{Afficher les archivés} pour voir aussi les dossiers archivés.
+
+\subsection{La fiche d’un dossier}
+\capture{09-fiche.jpg}{La fiche d’un dossier : chiffres, tâches, fiche et notes.}
+\begin{itemize}
+  \item En haut : tâches ouvertes, retards, attente client, échéances traitées, temps passé par rapport au budget.
+  \item Au milieu : les tâches \btn{À faire} et \btn{Terminées}, avec un champ pour en ajouter.
+  \item À droite : la fiche (le crayon sert à la modifier), puis les \textbf{notes} du dossier, enregistrées automatiquement.
+  \item Boutons du haut : \btn{Poser les échéances}, \btn{Rapport} (le rapport de ce dossier), \btn{Tâche}.
+  \item En bas à droite : \btn{Archiver} (le dossier disparaît des listes, sans être effacé) ou \btn{Supprimer} (définitif, avec ses tâches).
+\end{itemize}
+
+\subsection{Créer ou modifier un dossier}
+\capture[0.75\linewidth]{10-formulaire.jpg}{Le formulaire d’un dossier.}
+\begin{lexique}
+Nom et code & Le code (8 lettres maximum) s’affiche partout. S’il est vide, Nini en propose un. \\ \hline
+Manager & Choisis-le dans la liste, ou tape un nouveau prénom. \\ \hline
+Temps alloué & En jours par mois, par exemple \texttt{0.5} ou \texttt{1.25}. Il sert à la répartition. \\ \hline
+Période réservée & À cocher si le dossier a des jours réservés (du 5 au 10, par exemple). \\ \hline
+Imposition & IS ou IR. \\ \hline
+Clôture & La date de fin d’exercice, par exemple \texttt{31/12}. \\ \hline
+Régime de TVA & Mensuel, trimestriel, CA12 ou sans TVA. Sans TVA, le dossier n’a pas d’étapes TVA. \\ \hline
+Date limite TVA & Le 19, le 21 ou le 24. Elle sert d’échéance à la tâche TVA. \\ \hline
+Paie & À cocher si le cabinet gère la paie. \\ \hline
+Contact, budget & Interlocuteur, e-mail, téléphone, honoraires, budget temps annuel. \\ \hline
+\end{lexique}
+Quand tu crées un dossier, Nini te propose tout de suite de poser ses échéances de l’année.
+
+% =====================================================================
+\section{Poser les échéances de l’année}
+% =====================================================================
+\capture[0.8\linewidth]{11-echeances.jpg}{Les échéances proposées pour l’année.}
+Ce bouton (dans un dossier, ou dans la liste des dossiers pour tous à la fois) propose les grandes échéances de l’année :
+acomptes et solde d’IS, liasse, AG, dépôt au greffe, CFE, paie, TVA.
+\begin{etapes}
+  \item Choisis l’année.
+  \item Coche ou décoche chaque échéance. Celles déjà passées sont décochées, celles déjà créées sont grisées.
+  \item Clique sur \btn{Créer}.
+\end{etapes}
+\begin{attention}
+La routine du mois crée déjà la TVA mensuelle. Ici, \textbf{décoche les déclarations de TVA} pour ne pas les avoir en double.
+Les dates proposées sont des repères : la règle du cabinet prime.
+\end{attention}
+
+% =====================================================================
+\section{Le calendrier}
+% =====================================================================
+\capture{12-calendrier.jpg}{Le calendrier des échéances.}
+Chaque tâche apparaît le jour de son échéance, avec le code du dossier. En rouge : en retard. Barré : terminé.
+Clique sur une tâche pour l’ouvrir, ou sur un jour vide pour créer une tâche à cette date.
+La liste en haut à droite filtre par dossier.
+
+% =====================================================================
+\section{Les rapports}
+% =====================================================================
+\capture{13-rapports.jpg}{Le rapport d’activité du mois.}
+\begin{etapes}
+  \item Choisis la période : cette semaine, ce mois, le mois dernier, le trimestre, l’année, ou des dates libres.
+  \item Choisis un dossier, ou garde « Tous les dossiers ».
+  \item Options : \btn{Inclure les échéances futures} et \btn{Temps passés}.
+\end{etapes}
+Le rapport montre une synthèse par dossier, puis le détail : \textbf{travaux réalisés} et \textbf{reste à faire}, avec les retards.
+\begin{itemize}
+  \item \btn{Imprimer ou PDF} : imprime le rapport, ou choisis « Enregistrer au format PDF » dans la fenêtre d’impression.
+  \item \btn{Excel (CSV)} : télécharge le détail pour Excel.
+\end{itemize}
+
+% =====================================================================
+\section{Les réglages}\label{sec:reglages}
+% =====================================================================
+\subsection{Profil}
+Ton prénom, affiché sur l’accueil et sur les rapports.
+
+\subsection{La routine mensuelle}
+\capture{15-routine.jpg}{La routine : une carte par période.}
+Pour chaque période :
+\begin{lexique}
+Nom & Le nom de la période (« Début de mois »…). \\ \hline
+Planifiée du … au … & Les jours du mois où ce travail est prévu dans la répartition. C’est aussi la date de début des tâches. \\ \hline
+Échéance & Un jour fixe (le 17…), la date TVA du dossier, ou le dernier jour ouvré. \\ \hline
+Tâches & Une par dossier, une par manager, ou une seule. \\ \hline
+Étapes & Une étape par ligne. \\ \hline
+\end{lexique}
+\btn{Ajouter une période}, la corbeille pour en supprimer une, \btn{Routine d’origine} pour revenir au départ, puis \btn{Enregistrer la routine}.
+Les changements s’appliquent aux tâches créées ensuite, pas à celles qui existent déjà.
+
+\subsection{Stockage, sauvegardes et exports}
+\capture{16-sauvegardes.jpg}{Stockage, sauvegardes, exports et données.}
+\begin{lexique}
+Exporter une sauvegarde & Télécharge un fichier \texttt{.json} avec toutes tes données. À faire chaque vendredi, et à ranger sur le lecteur du cabinet. \\ \hline
+Restaurer… & Remplace toutes les données par celles d’un fichier de sauvegarde. \\ \hline
+Exports Excel & Toutes les tâches, ou tous les dossiers, en fichier pour Excel. \\ \hline
+Données d’exemple & Remplace tes données par des dossiers d’exemple, pour t’entraîner. \\ \hline
+Tout effacer & Efface tout. Nini demande une confirmation. \\ \hline
+\end{lexique}
+
+% =====================================================================
+\section{La sécurité}
+% =====================================================================
+\begin{securite}
+\textbf{Nini ne peut rien envoyer sur Internet.} Le navigateur lui interdit toute connexion. Même si quelqu’un essayait, la demande serait bloquée avant de partir.
+\end{securite}
+
+\capture{14-securite.jpg}{Réglages → Sécurité : l’état du verrou, le test et le journal.}
+
+\subsection{Vérifier que rien ne sort}
+\begin{etapes}
+  \item Va dans \btn{Réglages → Sécurité}.
+  \item Le bandeau doit être \textbf{vert} : « Verrou réseau actif ».
+  \item Clique sur \btn{Tester le verrou} : Nini essaie d’envoyer des données de 4 façons. Les 4 doivent être \textbf{bloquées}.
+  \item Le compteur \btn{requête vers l’extérieur} doit rester à \textbf{0}. Sinon, le bandeau devient rouge.
+\end{etapes}
+
+\subsection{Le journal de sécurité}
+Nini note tout ce qui concerne tes données, avec la date et l’heure : chaque ouverture, chaque tentative bloquée, chaque export et chaque restauration.
+Le journal ne peut pas être effacé depuis l’app. \btn{Exporter le journal} donne un fichier Excel à garder ou à montrer.
+
+\subsection{Vérifier sans faire confiance à Nini}
+\begin{itemize}
+  \item \textbf{Sur le PC} : touche \kbd{F12}, onglet \btn{Réseau}. Aucune ligne ne doit apparaître quand tu utilises Nini.
+  \item \textbf{Sur l’iPad} : passe en mode avion. Nini fonctionne exactement pareil.
+\end{itemize}
+
+\subsection{Les règles de sécurité}
+\begin{lexique}[0.42]
+\textcolor{ok}{\symb ✓}\enspace Sauvegarde chaque vendredi & Sur le lecteur du cabinet. Nini te le rappelle après 7 jours. \\ \hline
+\textcolor{ok}{\symb ✓}\enspace Verrouille ton ordinateur & \kbd{Windows}+\kbd{L} quand tu t’absentes : Nini n’a pas de mot de passe, il est protégé par ta session. \\ \hline
+\textcolor{ok}{\symb ✓}\enspace Ouvre Nini de la même façon & Même fichier, même endroit, même navigateur. \\ \hline
+\textcolor{no}{\symb ✕}\enspace Ne vide pas le navigateur & Effacer les données de navigation efface Nini. \\ \hline
+\textcolor{no}{\symb ✕}\enspace Pas de navigation privée & Tout serait perdu à la fermeture. \\ \hline
+\textcolor{no}{\symb ✕}\enspace Pas de mail perso ni de cloud perso & Une sauvegarde contient les noms des clients : c’est un document confidentiel du cabinet. \\ \hline
+\end{lexique}
+
+% =====================================================================
+\section{L’iPad et le changement d’appareil}\label{sec:ipad}
+% =====================================================================
+\subsection{Installer Nini sur l’iPad (une seule fois)}
+\begin{etapes}
+  \item Avec Internet, ouvre l’adresse de Nini dans \btn{Safari}.
+  \item Touche \btn{Partager → Sur l’écran d’accueil → Ajouter}. L’icône bleue « N » apparaît.
+  \item Ouvre Nini \btn{depuis son icône}, pas depuis Safari.
+  \item \btn{Réglages → Restaurer} : choisis ta sauvegarde, reçue par AirDrop (elle est dans l’app Fichiers).
+  \item C’est fini : coupe le Wi-Fi ou passe en mode avion, Nini fonctionne.
+\end{etapes}
+\capture[0.55\linewidth]{18-ipad.jpg}{Nini sur iPad, en mode portrait. Le menu s’ouvre avec le bouton en haut à gauche.}
+\begin{attention}
+Ne supprime pas l’icône de Nini : cela effacerait les données sur l’iPad.
+Sur l’iPad, \btn{Exporter une sauvegarde} ouvre le menu de partage : choisis \btn{AirDrop} ou \btn{Enregistrer dans Fichiers}.
+\end{attention}
+
+\subsection{Passer d’un appareil à l’autre}
+\begin{etapes}
+  \item Sur l’appareil où tu as travaillé : \btn{Exporter une sauvegarde}.
+  \item Transporte le fichier : AirDrop, câble, clé USB ou lecteur du cabinet.
+  \item Sur l’autre appareil : \btn{Réglages → Restaurer}.
+\end{etapes}
+\begin{attention}
+Ne travaille jamais sur deux appareils en même temps : la restauration remplace tout ce qu’il y avait avant.
+\end{attention}
+
+% =====================================================================
+\section{Raccourcis et palette de recherche}
+% =====================================================================
+\capture[0.8\linewidth]{17-palette.jpg}{La palette : tape quelques lettres, puis Entrée.}
+\begin{lexique}[0.32]
+\kbd{Ctrl} + \kbd{K} & Ouvre la palette : chercher une tâche, un dossier, aller à une page, créer, lancer ou arrêter un chrono. Sur Mac : \kbd{⌘}+\kbd{K}. \\ \hline
+\kbd{N} & Nouvelle tâche (quand tu n’es pas en train d’écrire). \\ \hline
+\kbd{Échap} & Ferme le panneau ou la fenêtre ouverte. \\ \hline
+\kbd{Entrée} & Valide un champ : étape, temps, titre, ajout rapide. \\ \hline
+\kbd{Ctrl} + \kbd{Entrée} & Publie un commentaire. \\ \hline
+\end{lexique}
+
+% =====================================================================
+\section{Questions fréquentes}
+% =====================================================================
+\begin{lexique}[0.36]
+Je ne vois plus mes dossiers & \btn{Réglages → Restaurer}, puis choisis ta dernière sauvegarde. Vérifie aussi que tu as ouvert le bon fichier, dans le bon navigateur. \\ \hline
+Le client n’a pas envoyé ses pièces & Ouvre la tâche → \btn{Reporter}, choisis une date de reprise, puis prends une autre tâche à la place. \\ \hline
+J’ai coché une tâche par erreur & \btn{Annuler} dans le message en bas, ou clique à nouveau sur le rond. \\ \hline
+J’ai supprimé une tâche par erreur & \btn{Annuler} dans le message en bas, tout de suite. Sinon, restaure ta dernière sauvegarde. \\ \hline
+Les tâches du mois n’apparaissent pas & \btn{Répartition → Créer les tâches du mois}. \\ \hline
+Le planning ne me convient pas & Déplace les blocs, ou \btn{Nouvelle proposition}. \\ \hline
+Un dossier a trop ou pas assez de temps & Change son temps alloué dans l’équilibre (à droite du planning), puis \btn{Nouvelle proposition}. \\ \hline
+La date de TVA d’un dossier change & Fiche du dossier → crayon → \btn{Date limite TVA}. \\ \hline
+Un nouveau client arrive & \btn{Dossiers → Nouveau dossier}, puis pose ses échéances. \\ \hline
+Un client part & Fiche du dossier → \btn{Archiver}. Son historique est gardé. \\ \hline
+Je veux changer une étape pour tous les mois & \btn{Réglages → Routine mensuelle}. \\ \hline
+Le rapport ne montre pas tout & Coche \btn{Inclure les échéances futures}, ou choisis une période plus longue. \\ \hline
+Le cadre jaune de sauvegarde reste affiché & Clique sur \btn{Sauvegarder} : il disparaît pour 7 jours. \\ \hline
+\end{lexique}
+
+% =====================================================================
+\section*{Les règles d’or}
+% =====================================================================
+\addcontentsline{toc}{section}{Les règles d’or}
+\begin{securite}
+\begin{etapes}
+  \item Le 1\textsuperscript{er} du mois : \btn{Créer les tâches du mois}, puis \btn{Proposer une répartition}.
+  \item Chaque matin : \btn{Aujourd’hui}, puis coche les étapes au fil de la journée.
+  \item Chaque vendredi : \btn{Exporter une sauvegarde} sur le lecteur du cabinet.
+  \item Toujours : verrouiller l’ordinateur, pas de navigation privée, pas de sauvegarde par mail perso.
+  \item En cas de doute sur une échéance : la règle du cabinet prime.
+\end{etapes}
+\end{securite}
+
+\end{document}

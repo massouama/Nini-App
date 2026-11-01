@@ -1,10 +1,11 @@
-import { Copy, Pause, Play, Trash2, X } from 'lucide-react';
+import { CalendarClock, Copy, Pause, Play, Trash2, X } from 'lucide-react';
+import { PostponeDialog } from './PostponeDialog';
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { useData, useStore } from '../data/StoreContext';
 import { fmtDate, fmtDateTime, today } from '../lib/dates';
 import { fmtClock, fmtMin, parseDuration, uid } from '../lib/format';
 import { CATEGORIES, PRIORITIES, RECURRENCES, STATUSES } from '../domain/constants';
-import { clientCode, logEntry, newTask, timeSpent, withStatus } from '../domain/tasks';
+import { clientCode, logEntry, newTask, startOf, timeSpent, withStatus } from '../domain/tasks';
 import type { Task } from '../domain/types';
 import { DueLabel } from './DueLabel';
 import { StatusIcon } from './StatusIcon';
@@ -137,6 +138,7 @@ function PanelContent({ task, isNew, title, desc, setTitle, setDesc, update }: {
   const running = timer?.taskId === task.id;
   const now = useNow(running);
   const [step, setStep] = useState('');
+  const [postponing, setPostponing] = useState(false);
   const [comment, setComment] = useState('');
   const [te, setTe] = useState({ date: today(), dur: '', note: '' });
   const spent = timeSpent(task);
@@ -206,6 +208,7 @@ function PanelContent({ task, isNew, title, desc, setTitle, setDesc, update }: {
               <button className={`btn sm ${running ? 'rec-btn' : ''}`} onClick={toggleTimer} title={running ? 'Arrêter et enregistrer le temps' : 'Lancer le chrono'}>
                 {running ? <><Pause size={13} /> {fmtClock(now - (timer?.start ?? now))}</> : <><Play size={13} /> Chrono</>}
               </button>
+              {task.status !== 'done' && <button className="btn sm" onClick={() => setPostponing(true)} title="Reporter la tâche à plus tard"><CalendarClock size={13} /> Reporter</button>}
               <button className="icon-btn" onClick={duplicate} title="Dupliquer"><Copy size={15} /></button>
               <button className="icon-btn danger" onClick={remove} title="Supprimer"><Trash2 size={15} /></button>
             </>
@@ -213,6 +216,13 @@ function PanelContent({ task, isNew, title, desc, setTitle, setDesc, update }: {
           <button className="icon-btn" onClick={nav.close} title="Fermer (Échap)"><X size={17} /></button>
         </div>
       </header>
+      {!isNew && <PostponeDialog task={task} open={postponing} onClose={() => setPostponing(false)} />}
+      {task.reportedUntil && task.status !== 'done' && (
+        <div className="panel-banner">
+          <CalendarClock size={15} /> Reportée jusqu’au {fmtDate(task.reportedUntil, 'short')}.
+          <button className="btn sm" onClick={() => update({ reportedUntil: null, status: 'doing', log: [...task.log, logEntry('Reprise de la tâche')] })}>Reprendre maintenant</button>
+        </div>
+      )}
 
       <div className="panel-body">
         <AutoText
@@ -228,6 +238,9 @@ function PanelContent({ task, isNew, title, desc, setTitle, setDesc, update }: {
                 {STATUSES.map(s => <option key={s.id} value={s.id}>{s.label}</option>)}
               </select>
             </span>
+          </Prop>
+          <Prop label="Début">
+            <input type="date" value={startOf(task, data.settings.routine)} onChange={e => update({ startDate: e.target.value })} />
           </Prop>
           <Prop label="Échéance">
             <span className="with-hint">

@@ -87,3 +87,16 @@ describe('routine mensuelle', () => {
     expect(again).toHaveLength(0);
   });
 });
+
+describe('date de début des tâches de routine', () => {
+  it('fait commencer chaque période à son premier jour, même pour des tâches importées sans date', async () => {
+    const { startOf, isStarted } = await import('./tasks');
+    const tasks = routineTasks('2026-11', clients, DEFAULT_ROUTINE, new Set());
+    const debut = tasks.find(t => t.title.startsWith('Début de mois'))!;
+    const tva = tasks.find(t => t.title.startsWith('TVA'))!;
+    expect(startOf(debut, DEFAULT_ROUTINE)).toBe('2026-11-01');
+    expect(startOf({ ...tva, startDate: undefined }, DEFAULT_ROUTINE)).toBe('2026-11-18'); // ancienne tâche sans date
+    expect(isStarted(debut, DEFAULT_ROUTINE, '2026-11-02')).toBe(true);
+    expect(isStarted(tva, DEFAULT_ROUTINE, '2026-11-02')).toBe(false);
+  });
+});
