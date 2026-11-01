@@ -239,6 +239,16 @@ input[type=checkbox]:disabled { opacity: .5; }
 .timer-txt b { font-family: var(--mono); font-size: 13px; font-weight: 500; color: var(--red); }
 .timer-txt span { font-size: 12px; color: var(--text-2); }
 
+.backup-card {
+  display: grid; grid-template-columns: auto 1fr; gap: 4px 10px; align-items: start; padding: 10px 12px; border-radius: 10px;
+  background: var(--amber-soft); color: var(--text);
+}
+.backup-card > svg { color: var(--amber); margin-top: 2px; }
+.backup-card div { display: flex; flex-direction: column; line-height: 1.35; }
+.backup-card b { font-size: 12.5px; font-weight: 600; }
+.backup-card span { font-size: 12px; color: var(--text-2); }
+.backup-card .btn { grid-column: 1 / -1; background: var(--bg); }
+
 /* ---------- En-têtes de page ---------- */
 .page-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap; margin-bottom: 28px; }
 .page-head h1 { font-size: 28px; font-weight: 650; letter-spacing: -0.028em; }

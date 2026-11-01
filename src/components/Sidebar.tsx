@@ -1,4 +1,4 @@
-import { CalendarDays, Cloud, FileText, FolderOpen, HardDrive, ListTodo, Pause, Plus, Search, Settings, Sun } from 'lucide-react';
+import { CalendarDays, Cloud, DownloadCloud, FileText, FolderOpen, HardDrive, ListTodo, Pause, Plus, Search, Settings, Sun } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import { useData, useStore } from '../data/StoreContext';
 import { today } from '../lib/dates';
@@ -6,6 +6,7 @@ import { fmtClock, fmtMin } from '../lib/format';
 import { clientStats } from '../domain/stats';
 import { clientCode, isOpen, isOverdue } from '../domain/tasks';
 import { useToast } from './ui/Toasts';
+import { useBackup } from './useBackup';
 import { useNow } from './useNow';
 import { useTaskNav } from './useTaskNav';
 
@@ -17,6 +18,7 @@ export function Sidebar({ onSearch, open, onNavigate }: { onSearch: () => void; 
   const ref = today();
   const timerTask = settings.timer ? tasks.find(t => t.id === settings.timer!.taskId) : undefined;
   const now = useNow(!!timerTask);
+  const backup = useBackup();
   const todayCount = tasks.filter(t => isOpen(t) && t.dueDate && t.dueDate <= ref).length;
   const lateCount = tasks.filter(t => isOverdue(t, ref)).length;
   const active = clients.filter(c => !c.archived).sort((a, b) => a.name.localeCompare(b.name, 'fr'));
@@ -56,6 +58,13 @@ export function Sidebar({ onSearch, open, onNavigate }: { onSearch: () => void; 
       </div>
 
       <div className="side-bottom">
+        {backup.due && store.repo.kind === 'local' && (
+          <div className="backup-card">
+            <DownloadCloud size={16} />
+            <div><b>Sauvegarde conseillée</b><span>{backup.days === null ? 'Aucune sauvegarde pour l’instant' : `Dernière il y a ${backup.days} jours`}</span></div>
+            <button className="btn sm" onClick={() => { backup.exportNow(); toast('Sauvegarde téléchargée'); }}>Sauvegarder</button>
+          </div>
+        )}
         {timerTask && settings.timer && (
           <div className="timer-card" onClick={() => nav.open(timerTask.id)} role="button" tabIndex={0}>
             <span className="rec" />

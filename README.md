@@ -4,6 +4,22 @@ Application web pour un·e **collaborateur·rice comptable** : suivre les dossie
 
 Projet **100 % open source** (licence MIT), comme toutes ses dépendances.
 
+## Au bureau : un seul fichier, rien à installer
+
+[`release/Nini.html`](release/Nini.html) contient toute l'application dans **un seul fichier**.
+
+1. Copier `Nini.html` dans un dossier personnel du PC (par exemple *Documents*). Ne plus le déplacer ensuite.
+2. L'ouvrir par double-clic dans **Edge** ou **Chrome**, et l'ajouter aux favoris.
+
+**Pourquoi c'est sûr pour les données :**
+- pas de serveur, pas de compte, pas de cloud : tout reste dans le navigateur de ce PC ;
+- le fichier contient une règle de sécurité (*Content-Security-Policy*) qui **interdit au navigateur toute connexion réseau** depuis l'app. Même en cas de bug, aucune donnée ne peut partir sur Internet ;
+- **sauvegardes** : un rappel s'affiche après 7 jours sans sauvegarde. Le bouton télécharge un fichier `.json` à ranger sur un lecteur sauvegardé par le cabinet. Il se restaure via *Réglages → Restaurer*.
+
+À savoir : effacer les données de navigation du navigateur efface aussi celles de l'app, d'où l'importance des sauvegardes. Il vaut mieux vérifier avec le responsable informatique que l'usage d'un fichier HTML local est autorisé.
+
+Pour régénérer le fichier après une modification du code : `npm run build:offline`.
+
 ## Fonctionnalités
 
 - **Aujourd'hui** : retards, tâches du jour, les 7 prochains jours classés par date, tâches en attente du client (avec le nombre de jours depuis la relance).

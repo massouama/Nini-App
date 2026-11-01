@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { PageHeader, Section } from '../components/PageHeader';
 import { useConfirm } from '../components/ui/Confirm';
 import { useToast } from '../components/ui/Toasts';
+import { useBackup } from '../components/useBackup';
 import { useData, useStore } from '../data/StoreContext';
 import { normalizeData } from '../data/normalize';
 import { supabase } from '../data/supabase';
@@ -28,10 +29,7 @@ export function SettingsPage({ email }: { email?: string }) {
   const size = new Blob([JSON.stringify(data)]).size;
   const nameOf = (id: string) => data.clients.find(c => c.id === id)?.name ?? '';
 
-  const exportJson = () => {
-    store.setSettings({ lastBackup: Date.now() });
-    download(`nini-sauvegarde-${today()}.json`, JSON.stringify({ ...data, version: 2 }, null, 2), 'application/json');
-  };
+  const { exportNow: exportJson } = useBackup();
   const importJson = async (file: File) => {
     try {
       const parsed = normalizeData(JSON.parse(await readFile(file)));

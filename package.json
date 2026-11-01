@@ -10,7 +10,8 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "test": "vitest run",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "build:offline": "tsc --noEmit && vite build --mode offline && node scripts/rename-offline.mjs"
   },
   "dependencies": {
     "@fontsource-variable/geist": "5.2.8",
@@ -28,6 +29,7 @@
     "@vitejs/plugin-react": "5.0.4",
     "typescript": "5.9.3",
     "vite": "7.3.7",
+    "vite-plugin-singlefile": "2.3.4",
     "vitest": "4.1.12"
   }
 }
