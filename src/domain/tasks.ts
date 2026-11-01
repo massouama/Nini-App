@@ -2,6 +2,7 @@ import { addDays, addMonths, fmtDate, isoFromMs, today, withDay } from '../lib/d
 import { uid } from '../lib/format';
 import { PRIORITIES, PRIO_RANK, STATUSES, label } from './constants';
 import { DEFAULT_ROUTINE } from './routine';
+import { workingOnOrAfter } from './workdays';
 import type { Client, LogEntry, RoutinePhase, Settings, Status, Task } from './types';
 
 export const defaultSettings = (): Settings => ({ profileName: '', timer: null, lastBackup: null, routine: structuredClone(DEFAULT_ROUTINE), plans: {} });
@@ -43,7 +44,7 @@ export function startOf(t: Task, routine: RoutinePhase[]): string {
   const parts = t.key.split('|');
   const phase = routine.find(p => p.id === parts[parts.indexOf('routine') + 1]);
   const month = parts[parts.length - 1];
-  return phase && /^\d{4}-\d{2}$/.test(month) ? withDay(`${month}-01`, phase.from) : '';
+  return phase && /^\d{4}-\d{2}$/.test(month) ? workingOnOrAfter(withDay(`${month}-01`, phase.from)) : '';
 }
 
 /** Tâche commencée (date de début atteinte) et pas encore terminée. */

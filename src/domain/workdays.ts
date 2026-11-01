@@ -32,6 +32,19 @@ export function workingDays(month: string): string[] {
 
 export const lastWorkingDay = (month: string) => workingDays(month).at(-1)!;
 
+const isWorking = (d: string) => {
+  const x = new Date(+d.slice(0, 4), +d.slice(5, 7) - 1, +d.slice(8, 10));
+  return x.getDay() !== 0 && x.getDay() !== 6 && !frenchHolidays(x.getFullYear()).has(d);
+};
+const shift = (d: string, n: number) => {
+  const x = new Date(+d.slice(0, 4), +d.slice(5, 7) - 1, +d.slice(8, 10) + n);
+  return `${x.getFullYear()}-${String(x.getMonth() + 1).padStart(2, '0')}-${String(x.getDate()).padStart(2, '0')}`;
+};
+/** Le jour même s'il est ouvré, sinon le jour ouvré suivant. */
+export function workingOnOrAfter(d: string) { while (!isWorking(d)) d = shift(d, 1); return d; }
+/** Le jour même s'il est ouvré, sinon le jour ouvré précédent. */
+export function workingOnOrBefore(d: string) { while (!isWorking(d)) d = shift(d, -1); return d; }
+
 /** Jour ouvré situé n jours ouvrés après la date (n ≥ 1). */
 export function addWorkingDays(date: string, n: number): string {
   const d = new Date(+date.slice(0, 4), +date.slice(5, 7) - 1, +date.slice(8, 10));

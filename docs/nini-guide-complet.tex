@@ -150,7 +150,7 @@ Manager & La personne responsable du dossier. Les dossiers sont regroupés par m
 Tâche & Un travail à faire : « Début de mois », « TVA \& révision »… \\ \hline
 Étapes & La liste à cocher à l’intérieur d’une tâche : intégration banque, lettrage… \\ \hline
 Période & Un moment du mois : début, milieu, TVA, fin. Chaque période a ses tâches. \\ \hline
-Date de début & Le jour où la tâche apparaît dans « À traiter en ce moment ». \\ \hline
+Date de début & Le jour où la tâche apparaît dans « À traiter en ce moment ». C’est toujours un jour ouvré. \\ \hline
 Échéance & La date à laquelle la tâche doit être finie. \\ \hline
 Répartition & Le planning du mois : quel dossier, quel jour, combien de temps. \\ \hline
 Créneau & Un bloc du planning : un dossier, un jour, une durée (1 h, 0,5 j…). \\ \hline
@@ -377,6 +377,7 @@ En fin de mois, Nini crée aussi le \textbf{tableau de variation du CA} et un \t
   \item Clique sur \btn{Proposer une répartition}.
   \item Regarde le planning et ajuste ce qui ne te convient pas.
 \end{etapes}
+Les dates tombent toujours sur des \textbf{jours ouvrés} : si le 1\textsuperscript{er} est un week-end, le début de mois commence le premier jour ouvré, et une période qui débute un jour férié commence le lendemain. Une échéance qui tombe un week-end ou un jour férié est avancée au jour ouvré précédent.
 
 \capture{06-repartition.jpg}{La répartition du mois : un bloc par dossier et par jour, l’équilibre à droite.}
 
