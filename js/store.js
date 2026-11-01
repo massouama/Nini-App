@@ -101,7 +101,7 @@ const Store = {
 
 function newClient(preset = {}) {
   return Object.assign({
-    id: U.uid(), name: '', siren: '', forme: 'SARL', activite: '', regimeFiscal: 'IS', regimeTva: 'mensuel',
+    id: U.uid(), name: '', code: '', siren: '', forme: 'SARL', activite: '', regimeFiscal: 'IS', regimeTva: 'mensuel',
     jourTva: 19, cloture: '12-31', paie: false, contact: '', email: '', phone: '',
     honoraires: '', budgetHeures: '', notes: '', archived: false, createdAt: Date.now(),
   }, preset);

@@ -43,44 +43,74 @@ const ui = () => (Store.s.ui ||= {});
 /* =========================================================================
    Composants
    ========================================================================= */
-function statusPill(s) { return `<span class="pill st-${s}">${esc(label(STATUSES, s))}</span>`; }
-function prioBadge(p) { return p === 'normal' ? '' : `<span class="prio pr-${p}" title="Priorité ${esc(label(PRIORITIES, p))}">${esc(label(PRIORITIES, p))}</span>`; }
+function statusPill(s) { return `<span class="st st-${s}"><i aria-hidden="true"></i>${esc(label(STATUSES, s))}</span>`; }
+function prioBadge(p) { return p === 'high' || p === 'urgent' ? `<span class="prio pr-${p}">${p === 'urgent' ? 'urgent' : 'prioritaire'}</span>` : ''; }
 
 function dueBadge(t) {
-  if (!t.dueDate) return '<span class="due muted">Sans échéance</span>';
+  if (!t.dueDate) return '<span class="due muted">sans échéance</span>';
   if (t.status === 'done') return `<span class="due muted">${U.fmtDateShort(t.dueDate)}</span>`;
   const d = U.daysBetween(U.today(), t.dueDate);
-  if (d < 0) return `<span class="due late">${ic('alert')} En retard · ${-d} j</span>`;
-  if (d === 0) return '<span class="due soon">Aujourd’hui</span>';
-  if (d === 1) return '<span class="due soon">Demain</span>';
-  if (d <= 7) return `<span class="due near">Dans ${d} j · ${U.fmtDateShort(t.dueDate)}</span>`;
+  if (d < 0) return `<span class="due late">${-d} j de retard</span>`;
+  if (d === 0) return '<span class="due soon">aujourd’hui</span>';
+  if (d === 1) return '<span class="due soon">demain</span>';
+  if (d <= 7) return `<span class="due near">dans ${d} j</span>`;
   return `<span class="due">${U.fmtDate(t.dueDate)}</span>`;
 }
 
+/* Colonne « échéance » des lignes : date courte + écart en jours. */
+function dueCell(t) {
+  if (!t.dueDate) return '<span class="t-due none">—</span>';
+  const d = U.parse(t.dueDate);
+  const n = U.daysBetween(U.today(), t.dueDate);
+  const rel = t.status === 'done' ? '' : n < 0 ? `+${-n} j` : n === 0 ? 'auj.' : n <= 14 ? `J-${n}` : '';
+  return `<span class="t-due ${T.isOverdue(t) ? 'late' : ''} ${t.status === 'done' ? 'done' : ''}"><b>${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth() + 1).padStart(2, '0')}</b>${rel ? `<small>${rel}</small>` : ''}</span>`;
+}
+
+/* Code dossier (saisi, sinon déduit du nom : « Boulangerie Martin » → BOUM). */
+function clientCode(c) {
+  if (!c) return '—';
+  if (c.code) return c.code.toUpperCase();
+  const w = c.name.replace(/^(SCI|SARL|SAS|SASU|EURL|SA|Dr|Me)\.?\s+/i, '').normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .replace(/[^A-Za-z ]/g, ' ').trim().split(/\s+/).filter(Boolean);
+  if (!w.length) return '—';
+  return (w.length > 1 ? w[0].slice(0, 3) + w[1].slice(0, 1) : w[0].slice(0, 4)).toUpperCase();
+}
 function clientDot(id) {
   const c = Store.client(id);
-  if (!c) return '<span class="cchip muted">Sans dossier</span>';
-  return `<span class="cchip" style="--h:${hue(c.id)}">${esc(c.name)}</span>`;
+  if (!c) return '<span class="cref muted">Hors dossier</span>';
+  return `<span class="cref"><span class="code">${esc(clientCode(c))}</span>${esc(c.name)}</span>`;
 }
-function hue(str) { let h = 0; for (const ch of String(str)) h = (h * 31 + ch.charCodeAt(0)) % 360; return h; }
 
 function progress(done, total, cls = '') {
   const p = U.pct(done, total);
-  return `<div class="progress ${cls}" title="${done}/${total} (${p} %)"><div style="width:${p}%"></div></div>`;
+  return `<span class="bar ${cls}" title="${done}/${total} (${p} %)"><span style="width:${p}%"></span></span>`;
 }
 
-function taskRow(t, { showClient = true } = {}) {
+function sec(title, count = null, cls = '') {
+  return `<h2 class="sec ${cls}">${title}${count != null ? `<span class="count">${count}</span>` : ''}</h2>`;
+}
+
+function taskRow(t, { showClient = true, extra = '' } = {}) {
   const done = t.status === 'done';
-  const ck = t.checklist.length ? `<span class="meta-i">${ic('tasks')} ${t.checklist.filter(c => c.done).length}/${t.checklist.length}</span>` : '';
-  const time = T.timeSpent(t) ? `<span class="meta-i">${ic('clock')} ${U.fmtMin(T.timeSpent(t))}</span>` : '';
+  const ckN = t.checklist.filter(c => c.done).length;
+  const meta = [
+    showClient ? esc(Store.clientName(t.clientId)) : '',
+    esc(t.category),
+    t.checklist.length ? `${ckN}/${t.checklist.length} étapes` : '',
+    T.timeSpent(t) ? U.fmtMin(T.timeSpent(t)) : '',
+    t.recurrence ? '↻ ' + esc(label(RECURRENCES, t.recurrence).toLowerCase()) : '',
+    extra,
+  ].filter(Boolean).join('<span class="sep">·</span>');
   const running = Store.s.timer?.taskId === t.id ? '<span class="rec" title="Chrono en cours"></span>' : '';
-  return `<div class="trow ${T.isOverdue(t) ? 'is-late' : ''} ${done ? 'is-done' : ''}" data-action="open-task" data-id="${t.id}" tabindex="0">
+  return `<div class="trow ${showClient ? '' : 'no-client'} ${T.isOverdue(t) ? 'is-late' : ''} ${done ? 'is-done' : ''}" data-action="open-task" data-id="${t.id}" tabindex="0">
     <input type="checkbox" class="chk" data-action="toggle-done" data-id="${t.id}" ${done ? 'checked' : ''} title="${done ? 'Rouvrir' : 'Marquer comme terminée'}" aria-label="Terminée">
+    ${dueCell(t)}
+    ${showClient ? `<span class="t-code">${esc(clientCode(Store.client(t.clientId)))}</span>` : ''}
     <div class="trow-main">
-      <div class="trow-title">${running}${esc(t.title)} ${prioBadge(t.priority)}</div>
-      <div class="trow-meta">${showClient ? clientDot(t.clientId) : ''}<span class="meta-i">${esc(t.category)}</span>${ck}${time}${t.recurrence ? `<span class="meta-i" title="Récurrente">↻ ${esc(label(RECURRENCES, t.recurrence))}</span>` : ''}</div>
+      <div class="trow-title">${running}${esc(t.title)}${prioBadge(t.priority)}</div>
+      <div class="trow-meta">${meta}</div>
     </div>
-    <div class="trow-side">${statusPill(t.status)}${dueBadge(t)}</div>
+    ${statusPill(t.status)}
   </div>`;
 }
 
@@ -124,15 +154,16 @@ function viewDashboard() {
   const today = U.today();
   const tasks = Store.tasks();
   const name = Store.s.profile.name;
-  const hello = `Bonjour${name ? ' ' + esc(name) : ''} 👋`;
+  const dateTitle = U.fmtDate(today, true).replace(/^./, c => c.toUpperCase());
+  const sub = name ? `Registre de ${esc(name)}` : 'Registre des dossiers';
 
   if (!Store.clients().length && !tasks.length) {
-    return pageHead(hello, U.fmtDate(today, true)) + `<div class="card welcome">
-      <h2>Bienvenue dans ton espace de suivi des dossiers</h2>
-      <p>Commence par créer tes dossiers clients. Pour chaque dossier, l’app peut générer automatiquement les échéances de l’année (TVA, IS, liasse, AG, DSN, CFE…), que tu suis ensuite comme des tickets.</p>
+    return pageHead(dateTitle, sub) + `<div class="welcome">
+      <p class="lede">Le registre est vide.</p>
+      <p>Commence par ouvrir tes dossiers clients. Pour chacun, l’app peut poser d’un coup les échéances de l’année (TVA, IS, liasse, AG, DSN, CFE…), que tu suis ensuite ligne par ligne.</p>
       <div class="row-gap">
-        <button class="btn primary" data-action="new-client">${ic('plus')} Créer mon premier dossier</button>
-        <button class="btn" data-action="load-demo">Essayer avec des données de démonstration</button>
+        <button class="btn primary" data-action="new-client">Ouvrir un premier dossier</button>
+        <button class="btn" data-action="load-demo">Voir avec des données d’exemple</button>
       </div></div>`;
   }
 
@@ -147,45 +178,49 @@ function viewDashboard() {
   const doneMonth = tasks.filter(t => t.status === 'done' && t.completedAt && U.isoFromMs(t.completedAt) >= mStart).length;
   const timeMonth = tasks.reduce((s, t) => s + T.timeIn(t, mStart, mEnd), 0);
 
-  const list = (arr, empty, max = 8) => arr.length
-    ? arr.slice(0, max).map(t => taskRow(t)).join('') + (arr.length > max ? `<p class="more muted">+ ${arr.length - max} autre(s)…</p>` : '')
-    : `<p class="muted small pad">${empty}</p>`;
-
-  const waitingRows = waiting.length ? waiting.slice(0, 8).map(t => {
+  const list = (arr, empty, max = 8, opts = () => ({})) => arr.length
+    ? `<div class="tlist">${arr.slice(0, max).map(t => taskRow(t, opts(t))).join('')}</div>` + (arr.length > max ? `<a class="more" data-action="goto-tasks" data-f="open">${arr.length - max} de plus →</a>` : '')
+    : `<p class="nothing">${empty}</p>`;
+  const waitOpts = t => {
     const days = t.waitingSince ? Math.floor((Date.now() - t.waitingSince) / 86400000) : null;
-    return taskRow(t).replace('<div class="trow-side">', `<div class="trow-side">${days != null ? `<span class="due ${days >= 7 ? 'late' : ''}">${ic('hourglass')} ${days} j</span>` : ''}`);
-  }).join('') : '<p class="muted small pad">Rien en attente côté clients.</p>';
+    return { extra: days != null ? `<span class="${days >= 7 ? 'late-t' : ''}">relancé il y a ${days} j</span>` : '' };
+  };
 
   const clients = Store.clients().map(c => ({ c, st: clientStats(c) }))
     .sort((a, b) => b.st.overdue - a.st.overdue || (a.st.next?.dueDate || '9').localeCompare(b.st.next?.dueDate || '9'));
 
-  return pageHead(hello, U.fmtDate(today, true), `<button class="btn primary" data-action="new-task">${ic('plus')} Nouvelle tâche</button>`) + `
+  return pageHead(dateTitle, sub) + `
   <section class="kpis">
-    ${kpi(open.length, 'Tâches ouvertes', '', 'data-action="goto-tasks" data-f="open"')}
-    ${kpi(overdue.length, 'En retard', overdue.length ? 'danger' : 'ok', 'data-action="goto-tasks" data-f="overdue"')}
-    ${kpi(week.length, 'Échéances à 7 jours', week.length ? 'warn' : '', 'data-action="goto-tasks" data-f="week"')}
-    ${kpi(waiting.length, 'En attente client', waiting.length ? 'info' : '', 'data-action="goto-tasks" data-f="waiting"')}
-    ${kpi(doneMonth, 'Terminées ce mois', 'ok')}
-    ${kpi(U.fmtMin(timeMonth), 'Temps passé ce mois')}
+    ${kpi(open.length, 'ouvertes', '', 'data-action="goto-tasks" data-f="open"')}
+    ${kpi(overdue.length, 'en retard', overdue.length ? 'danger' : '', 'data-action="goto-tasks" data-f="overdue"')}
+    ${kpi(week.length, 'à 7 jours', '', 'data-action="goto-tasks" data-f="week"')}
+    ${kpi(waiting.length, 'chez le client', '', 'data-action="goto-tasks" data-f="waiting"')}
+    ${kpi(doneMonth, `faites en ${U.monthName(+today.slice(5, 7) - 1)}`)}
+    ${kpi(U.fmtMin(timeMonth), 'saisies ce mois')}
   </section>
   <div class="grid-2">
-    <section class="card"><h2 class="card-t danger-t">${ic('alert')} En retard <span class="count">${overdue.length}</span></h2>${list(overdue, 'Aucun retard, bravo ✨')}</section>
-    <section class="card"><h2 class="card-t">${ic('cal')} Prochaines échéances (14 jours) <span class="count">${upcoming.length}</span></h2>${list(upcoming, 'Aucune échéance dans les 14 prochains jours.')}</section>
-    <section class="card"><h2 class="card-t">${ic('play')} En cours <span class="count">${doing.length}</span></h2>${list(doing, 'Aucune tâche en cours.')}</section>
-    <section class="card"><h2 class="card-t">${ic('hourglass')} En attente client <span class="count">${waiting.length}</span></h2>${waitingRows}</section>
+    <div>
+      <section class="block">${sec('En retard', overdue.length, overdue.length ? 'danger-t' : '')}${list(overdue, 'Aucun retard.')}</section>
+      <section class="block">${sec('Les quinze prochains jours', upcoming.length)}${list(upcoming, 'Rien d’échu dans les quinze jours.', 10)}</section>
+    </div>
+    <div>
+      <section class="block">${sec('En cours', doing.length)}${list(doing, 'Aucune tâche commencée.')}</section>
+      <section class="block">${sec('En attente du client', waiting.length)}${list(waiting, 'Personne à relancer.', 8, waitOpts)}</section>
+    </div>
   </div>
-  <section class="card">
-    <h2 class="card-t">${ic('folder')} Avancement des dossiers – ${new Date().getFullYear()}</h2>
+  <section class="block">
+    ${sec(`Dossiers — exercice ${new Date().getFullYear()}`)}
     ${clients.length ? `<div class="table-wrap"><table class="table">
-      <thead><tr><th>Dossier</th><th>Avancement de l’année</th><th class="num">Ouvertes</th><th class="num">En retard</th><th>Prochaine échéance</th><th class="num">Temps / budget</th></tr></thead>
+      <thead><tr><th>Code</th><th>Dossier</th><th>Échéances de l’année</th><th class="num">Ouvertes</th><th class="num">Retard</th><th>Prochaine échéance</th><th class="num">Temps / budget</th></tr></thead>
       <tbody>${clients.map(({ c, st }) => `<tr class="clickable" data-action="goto" data-href="#/dossier/${c.id}">
-        <td>${clientDot(c.id)}</td>
-        <td><div class="prog-cell">${progress(st.yearDone, st.yearTotal)}<span class="small muted">${st.yearDone}/${st.yearTotal}</span></div></td>
+        <td><span class="code">${esc(clientCode(c))}</span></td>
+        <td>${esc(c.name)}</td>
+        <td><div class="prog-cell">${progress(st.yearDone, st.yearTotal)}<span class="mono small">${st.yearDone}/${st.yearTotal}</span></div></td>
         <td class="num">${st.open.length}</td>
-        <td class="num">${st.overdue ? `<span class="late-t">${st.overdue}</span>` : '0'}</td>
-        <td>${st.next ? `<span class="small">${esc(st.next.title)}</span><br>${dueBadge(st.next)}` : '<span class="muted small">—</span>'}</td>
-        <td class="num">${U.fmtMin(st.minutesYear)}${c.budgetHeures ? ` / ${c.budgetHeures}h` : ''}</td>
-      </tr>`).join('')}</tbody></table></div>` : '<p class="muted pad">Aucun dossier actif.</p>'}
+        <td class="num">${st.overdue ? `<span class="late-t">${st.overdue}</span>` : '<span class="muted">0</span>'}</td>
+        <td>${st.next ? `<span class="small ${T.isOverdue(st.next) ? 'late-t' : ''}">${U.fmtDateShort(st.next.dueDate)}</span> <span class="small">${esc(st.next.title)}</span>` : '<span class="muted small">—</span>'}</td>
+        <td class="num">${U.fmtMin(st.minutesYear)}${c.budgetHeures ? `<span class="muted"> / ${c.budgetHeures}h</span>` : ''}</td>
+      </tr>`).join('')}</tbody></table></div>` : '<p class="nothing">Aucun dossier actif.</p>'}
   </section>`;
 }
 
@@ -233,7 +268,7 @@ function filterTasks(f, { ignoreStatus = false } = {}) {
 function viewTasks() {
   const f = taskFilters();
   const sel = (name, options, val) => `<select data-filter="${name}">${options.map(([v, t]) => opt(v, t, v === val)).join('')}</select>`;
-  return pageHead('Tâches', 'Toutes les demandes et travaux à réaliser, façon tickets', `<button class="btn primary" data-action="new-task">${ic('plus')} Nouvelle tâche</button>`) + `
+  return pageHead('Tâches', 'Chaque travail à faire, une ligne', `<button class="btn primary" data-action="new-task">Nouvelle tâche</button>`) + `
   <div class="toolbar card">
     <label class="search">${ic('search')}<input type="search" data-filter="q" placeholder="Rechercher une tâche, un dossier…" value="${esc(f.q)}"></label>
     <select data-filter="client">${opt('', 'Tous les dossiers', !f.client)}${Store.clients(true).map(c => opt(c.id, c.name, c.id === f.client)).join('')}</select>
@@ -243,8 +278,8 @@ function viewTasks() {
     ${sel('priority', [['', 'Toutes priorités'], ...PRIORITIES.map(p => [p.id, p.label])], f.priority)}
     ${sel('sort', [['due', 'Tri : échéance'], ['priority', 'Tri : priorité'], ['client', 'Tri : dossier'], ['updated', 'Tri : modifiées récemment']], f.sort)}
     <div class="seg">
-      <button class="${f.mode === 'list' ? 'on' : ''}" data-action="task-mode" data-mode="list" title="Liste">${ic('list')}</button>
-      <button class="${f.mode === 'kanban' ? 'on' : ''}" data-action="task-mode" data-mode="kanban" title="Kanban">${ic('kanban')}</button>
+      <button class="${f.mode === 'list' ? 'on' : ''}" data-action="task-mode" data-mode="list" title="Liste">Liste</button>
+      <button class="${f.mode === 'kanban' ? 'on' : ''}" data-action="task-mode" data-mode="kanban" title="Colonnes par statut">Colonnes</button>
     </div>
     <button class="btn ghost small-btn" data-action="reset-filters">Réinitialiser</button>
   </div>
@@ -272,7 +307,7 @@ function taskResults() {
   const list = filterTasks(f);
   const total = list.reduce((s, t) => s + T.timeSpent(t), 0);
   return `<p class="muted small">${list.length} tâche(s)${total ? ` · ${U.fmtMin(total)} passées` : ''}</p>
-    <div class="card tlist">${list.length ? list.map(t => taskRow(t)).join('') : emptyState('Aucune tâche ne correspond à ces filtres.')}</div>`;
+    <div class="tlist">${list.length ? list.map(t => taskRow(t)).join('') : emptyState('Aucune tâche ne correspond à ces filtres.')}</div>`;
 }
 
 /* =========================================================================
@@ -281,28 +316,32 @@ function taskResults() {
 function viewClients() {
   const showArch = !!ui().showArchived;
   const q = (ui().cq || '').toLowerCase();
-  const clients = Store.clients(showArch).filter(c => !q || `${c.name} ${c.siren} ${c.contact} ${c.activite}`.toLowerCase().includes(q));
-  return pageHead('Dossiers', `${Store.clients().length} dossier(s) actif(s)`, `
-      <button class="btn" data-action="gen-all">${ic('wand')} Générer les échéances</button>
-      <button class="btn primary" data-action="new-client">${ic('plus')} Nouveau dossier</button>`) + `
-    <div class="toolbar card">
-      <label class="search">${ic('search')}<input type="search" id="client-search" placeholder="Rechercher un dossier (nom, SIREN, contact…)" value="${esc(ui().cq || '')}"></label>
-      <label class="check"><input type="checkbox" data-action="toggle-archived" ${showArch ? 'checked' : ''}> Afficher les dossiers archivés</label>
+  const clients = Store.clients(showArch).filter(c => !q || `${c.name} ${clientCode(c)} ${c.siren} ${c.contact} ${c.activite}`.toLowerCase().includes(q));
+  return pageHead('Répertoire des dossiers', `${Store.clients().length} dossier(s) actif(s)`, `
+      <button class="btn" data-action="gen-all">Poser les échéances…</button>
+      <button class="btn primary" data-action="new-client">Nouveau dossier</button>`) + `
+    <div class="toolbar">
+      <label class="search">${ic('search')}<input type="search" id="client-search" placeholder="Nom, code, SIREN, interlocuteur…" value="${esc(ui().cq || '')}"></label>
+      <label class="check"><input type="checkbox" data-action="toggle-archived" ${showArch ? 'checked' : ''}> Inclure les archivés</label>
     </div>
-    ${clients.length ? `<div class="cgrid">${clients.map(c => {
-      const st = clientStats(c);
-      return `<article class="card ccard ${c.archived ? 'archived' : ''}" data-action="goto" data-href="#/dossier/${c.id}" style="--h:${hue(c.id)}">
-        <div class="ccard-head"><span class="avatar">${esc(c.name.slice(0, 2).toUpperCase())}</span><div><h3>${esc(c.name)}</h3><p class="muted small">${esc(c.forme)} · ${esc(c.regimeFiscal)} · clôture ${esc(fmtCloture(c.cloture))}</p></div></div>
-        <div class="ccard-stats">
-          <div><b>${st.open.length}</b><span>ouvertes</span></div>
-          <div class="${st.overdue ? 'late-t' : ''}"><b>${st.overdue}</b><span>en retard</span></div>
-          <div><b>${st.waiting}</b><span>en attente</span></div>
-          <div><b>${U.fmtMin(st.minutesYear)}</b><span>${c.budgetHeures ? `/ ${c.budgetHeures}h` : 'cette année'}</span></div>
-        </div>
-        ${progress(st.yearDone, st.yearTotal)}
-        <p class="small muted">${st.next ? `Prochaine : ${esc(st.next.title)} – ${U.fmtDateShort(st.next.dueDate)}` : 'Aucune échéance ouverte'}</p>
-      </article>`;
-    }).join('')}</div>` : emptyState(q ? 'Aucun dossier trouvé.' : 'Aucun dossier pour le moment.', `<button class="btn primary" data-action="new-client">${ic('plus')} Créer un dossier</button>`)}`;
+    ${clients.length ? `<div class="table-wrap"><table class="table dir">
+      <thead><tr><th>Code</th><th>Dossier</th><th>Forme</th><th>Clôture</th><th>Régime</th><th class="num">Ouvertes</th><th class="num">Retard</th><th class="num">Attente</th><th>Avancement</th><th class="num">Temps / budget</th></tr></thead>
+      <tbody>${clients.map(c => {
+        const st = clientStats(c);
+        const over = c.budgetHeures && st.minutesYear > c.budgetHeures * 60;
+        return `<tr class="clickable ${c.archived ? 'archived' : ''}" data-action="goto" data-href="#/dossier/${c.id}">
+          <td><span class="code">${esc(clientCode(c))}</span></td>
+          <td><b>${esc(c.name)}</b>${c.archived ? ' <span class="muted small">(archivé)</span>' : ''}<div class="muted small">${esc(c.activite || c.contact || '')}</div></td>
+          <td>${esc(c.forme)}</td>
+          <td class="mono">${esc(fmtCloture(c.cloture))}</td>
+          <td class="small">${esc(c.regimeFiscal)} · ${esc({ mensuel: 'TVA mens.', trimestriel: 'TVA trim.', ca12: 'CA12', franchise: 'franchise' }[c.regimeTva] || '')}${c.paie ? ' · paie' : ''}</td>
+          <td class="num">${st.open.length}</td>
+          <td class="num">${st.overdue ? `<span class="late-t">${st.overdue}</span>` : '<span class="muted">0</span>'}</td>
+          <td class="num">${st.waiting || '<span class="muted">0</span>'}</td>
+          <td><div class="prog-cell">${progress(st.yearDone, st.yearTotal)}<span class="mono small">${st.yearDone}/${st.yearTotal}</span></div></td>
+          <td class="num ${over ? 'late-t' : ''}">${U.fmtMin(st.minutesYear)}${c.budgetHeures ? `<span class="muted"> / ${c.budgetHeures}h</span>` : ''}</td>
+        </tr>`;
+      }).join('')}</tbody></table></div>` : emptyState(q ? 'Aucun dossier ne correspond.' : 'Aucun dossier pour le moment.', `<button class="btn primary" data-action="new-client">Ouvrir un dossier</button>`)}`;
 }
 
 function fmtCloture(c) { return c ? c.split('-').reverse().join('/') : '31/12'; }
@@ -323,12 +362,12 @@ function viewClient(id) {
   const tabBtn = (k, txt, n) => `<button class="${tab === k ? 'on' : ''}" data-action="client-tab" data-tab="${k}">${txt} <span class="count">${n}</span></button>`;
   const budgetPct = c.budgetHeures ? U.pct(st.minutesYear, c.budgetHeures * 60) : null;
 
-  return `<a href="#/dossiers" class="back no-print">${ic('left')} Dossiers</a>` +
-    pageHead(`<span class="avatar lg" style="--h:${hue(c.id)}">${esc(c.name.slice(0, 2).toUpperCase())}</span> ${esc(c.name)} ${c.archived ? '<span class="pill">Archivé</span>' : ''}`, `${esc(c.forme)} · ${esc(c.activite || 'Activité non renseignée')}`, `
-      <button class="btn" data-action="edit-client" data-id="${c.id}">${ic('edit')} Modifier</button>
-      <button class="btn" data-action="gen-client" data-id="${c.id}">${ic('wand')} Générer les échéances</button>
-      <a class="btn" href="#/rapports?client=${c.id}">${ic('report')} Rapport</a>
-      <button class="btn primary" data-action="new-task" data-client="${c.id}">${ic('plus')} Tâche</button>`) + `
+  return `<a href="#/dossiers" class="back no-print">← Répertoire</a>` +
+    pageHead(`<span class="code lg">${esc(clientCode(c))}</span> ${esc(c.name)} ${c.archived ? '<span class="muted small">archivé</span>' : ''}`, `${esc(c.forme)} · ${esc(c.activite || 'Activité non renseignée')}`, `
+      <button class="btn" data-action="edit-client" data-id="${c.id}">Modifier</button>
+      <button class="btn" data-action="gen-client" data-id="${c.id}">Poser les échéances…</button>
+      <a class="btn" href="#/rapports?client=${c.id}">Rapport</a>
+      <button class="btn primary" data-action="new-task" data-client="${c.id}">Tâche</button>`) + `
     <section class="kpis">
       ${kpi(st.open.length, 'Tâches ouvertes')}
       ${kpi(st.overdue, 'En retard', st.overdue ? 'danger' : 'ok')}
@@ -339,13 +378,13 @@ function viewClient(id) {
     <div class="grid-side">
       <section class="card">
         <div class="tabs">${tabBtn('open', 'À faire', st.open.length)}${tabBtn('done', 'Terminées', st.all.length - st.open.length)}${tabBtn('all', 'Toutes', st.all.length)}</div>
-        <div class="tlist">${tasks.length ? tasks.map(t => taskRow(t, { showClient: false })).join('') : emptyState(tab === 'open' ? 'Rien à faire sur ce dossier 🎉' : 'Aucune tâche.', tab === 'open' && !st.all.length ? `<button class="btn" data-action="gen-client" data-id="${c.id}">${ic('wand')} Générer les échéances de l’année</button>` : '')}</div>
+        <div class="tlist">${tasks.length ? tasks.map(t => taskRow(t, { showClient: false })).join('') : emptyState(tab === 'open' ? 'Rien en cours sur ce dossier.' : 'Aucune tâche.', tab === 'open' && !st.all.length ? `<button class="btn" data-action="gen-client" data-id="${c.id}">Poser les échéances de l’année</button>` : '')}</div>
       </section>
       <aside>
-        <section class="card"><h2 class="card-t">Fiche dossier</h2>
-          <dl class="info">${info.filter(([, v]) => v).map(([k, v]) => `<dt>${k}</dt><dd>${k === 'E-mail' || k === 'Téléphone' ? v : esc(v)}</dd>`).join('')}</dl>
+        <section class="card"><h2 class="sec">Fiche dossier</h2>
+          <dl class="facts">${info.filter(([, v]) => v).map(([k, v]) => `<dt>${k}</dt><dd>${k === 'E-mail' || k === 'Téléphone' ? v : esc(v)}</dd>`).join('')}</dl>
         </section>
-        <section class="card"><h2 class="card-t">Notes</h2>
+        <section class="card"><h2 class="sec">Notes</h2>
           <textarea class="notes" data-action-input="client-notes" data-id="${c.id}" rows="7" placeholder="Particularités du dossier, accès, habitudes du client…">${esc(c.notes)}</textarea>
           <p class="muted small">Enregistrement automatique.</p>
         </section>
@@ -372,7 +411,7 @@ function viewCalendar() {
     const items = (byDay[d] || []).sort(byDue);
     cells.push(`<div class="cday ${d.slice(0, 7) !== month ? 'out' : ''} ${d === today ? 'today' : ''}" data-action="cal-day" data-date="${d}">
       <span class="dnum">${+d.slice(8)}</span>
-      ${items.slice(0, 4).map(t => `<div class="cev ${t.status === 'done' ? 'done' : T.isOverdue(t) ? 'late' : ''}" data-action="open-task" data-id="${t.id}" style="--h:${hue(t.clientId)}" title="${esc(Store.clientName(t.clientId) + ' — ' + t.title)}">${esc(t.title)}</div>`).join('')}
+      ${items.slice(0, 4).map(t => `<div class="cev ${t.status === 'done' ? 'done' : T.isOverdue(t) ? 'late' : ''}" data-action="open-task" data-id="${t.id}" title="${esc(Store.clientName(t.clientId) + ' — ' + t.title)}"><b>${esc(clientCode(Store.client(t.clientId)))}</b> ${esc(t.title)}</div>`).join('')}
       ${items.length > 4 ? `<div class="cmore">+ ${items.length - 4}</div>` : ''}
     </div>`);
   }
@@ -443,8 +482,8 @@ function viewReports() {
   const r = reportParams();
   const presets = [['week', 'Cette semaine'], ['lastweek', 'Semaine dernière'], ['month', 'Ce mois'], ['lastmonth', 'Mois dernier'], ['quarter', 'Ce trimestre'], ['year', 'Cette année'], ['custom', 'Période personnalisée']];
   return pageHead('Rapports', 'Ce qui a été fait et ce qu’il reste à faire, par période et par dossier', `
-      <button class="btn" data-action="report-csv">${ic('download')} Export Excel (CSV)</button>
-      <button class="btn primary" data-action="print">${ic('print')} Imprimer / PDF</button>`) + `
+      <button class="btn" data-action="report-csv">Export Excel (CSV)</button>
+      <button class="btn primary" data-action="print">Imprimer / PDF</button>`) + `
     <div class="toolbar card no-print">
       <select data-rep="preset">${presets.map(([v, t]) => opt(v, t, v === r.preset)).join('')}</select>
       ${r.preset === 'custom' ? `<label class="inline">Du <input type="date" data-rep="from" value="${esc(r.from)}"></label><label class="inline">au <input type="date" data-rep="to" value="${esc(r.to)}"></label>` : ''}
@@ -474,7 +513,7 @@ function reportHTML(r) {
     <h4>${esc(Store.clientName(cid))} <span class="muted">(${list.length})</span></h4>
     <table class="table rep"><thead><tr><th>Échéance</th><th>Tâche</th><th>Statut</th><th>Priorité</th><th>Avancement</th></tr></thead>
     <tbody>${list.map(t => `<tr class="${T.isOverdue(t) ? 'late-row' : ''}"><td>${t.dueDate ? U.fmtDate(t.dueDate) : '—'}${T.isOverdue(t) ? ` <span class="late-t small">(retard ${U.daysBetween(t.dueDate, U.today())} j)</span>` : ''}</td><td>${esc(t.title)}</td><td>${esc(label(STATUSES, t.status))}</td><td>${esc(label(PRIORITIES, t.priority))}</td><td>${t.checklist.length ? `${t.checklist.filter(c => c.done).length}/${t.checklist.length} étapes` : '—'}</td></tr>`).join('')}</tbody></table>`).join('')
-    : '<p class="muted">Rien à faire sur la période 🎉</p>';
+    : '<p class="muted">Rien à faire sur la période.</p>';
 
   return `<article class="report card">
     <header class="report-head">
@@ -492,8 +531,8 @@ function reportHTML(r) {
     <table class="table rep"><thead><tr><th>Dossier</th><th class="num">Terminées</th><th class="num">Restantes</th><th class="num">En retard</th><th class="num">En attente</th>${time ? '<th class="num">Temps</th>' : ''}</tr></thead>
     <tbody>${R.perClient.map(p => `<tr><td>${esc(p.name)}</td><td class="num">${p.done}</td><td class="num">${p.remaining}</td><td class="num">${p.overdue ? `<span class="late-t">${p.overdue}</span>` : 0}</td><td class="num">${p.waiting}</td>${time ? `<td class="num">${U.fmtMin(p.minutes)}</td>` : ''}</tr>`).join('')}
     <tr class="total"><td>Total</td><td class="num">${R.done.length}</td><td class="num">${R.remaining.length}</td><td class="num">${R.overdue.length}</td><td class="num">${R.remaining.filter(t => t.status === 'waiting').length}</td>${time ? `<td class="num">${U.fmtMin(R.minutes)}</td>` : ''}</tr></tbody></table>` : ''}
-    <h3 class="sec-done">✔ Travaux réalisés</h3>${doneTable}
-    <h3 class="sec-todo">○ Reste à faire ${r.includeAll ? '' : `<span class="muted small">(échéance au plus tard le ${U.fmtDate(R.to)} ou sans échéance)</span>`}</h3>${remTable}
+    <h3 class="sec-done">I. Travaux réalisés</h3>${doneTable}
+    <h3 class="sec-todo">II. Reste à faire ${r.includeAll ? '' : `<span class="muted small">(échéance au plus tard le ${U.fmtDate(R.to)} ou sans échéance)</span>`}</h3>${remTable}
   </article>`;
 }
 
@@ -505,27 +544,27 @@ function viewSettings() {
   const size = new Blob([JSON.stringify(s)]).size;
   return pageHead('Paramètres & sauvegardes') + `
     <div class="grid-2">
-      <section class="card"><h2 class="card-t">Profil</h2>
+      <section class="card"><h2 class="sec">Profil</h2>
         <label class="field"><span>Prénom (affiché sur l’accueil et les rapports)</span><input id="profile-name" value="${esc(s.profile.name)}" placeholder="Ex. Nini"></label>
       </section>
-      <section class="card"><h2 class="card-t">Sauvegarde</h2>
+      <section class="card"><h2 class="sec">Sauvegarde</h2>
         <p class="small">Les données sont stockées <b>uniquement dans ce navigateur</b> (${(size / 1024).toFixed(0)} Ko). Pense à exporter une sauvegarde régulièrement, et pour passer d’un appareil à un autre.</p>
         <p class="small muted">Dernière sauvegarde : ${s.lastBackup ? U.fmtDateTime(s.lastBackup) : 'jamais'}</p>
         <div class="row-gap">
-          <button class="btn primary" data-action="export-json">${ic('download')} Exporter une sauvegarde</button>
-          <label class="btn">${ic('upload')} Restaurer une sauvegarde<input type="file" id="import-file" accept="application/json,.json" hidden></label>
+          <button class="btn primary" data-action="export-json">Exporter une sauvegarde</button>
+          <label class="btn">Restaurer une sauvegarde<input type="file" id="import-file" accept="application/json,.json" hidden></label>
         </div>
       </section>
-      <section class="card"><h2 class="card-t">Exports</h2>
+      <section class="card"><h2 class="sec">Exports</h2>
         <div class="row-gap">
-          <button class="btn" data-action="export-tasks-csv">${ic('download')} Toutes les tâches (CSV)</button>
-          <button class="btn" data-action="export-clients-csv">${ic('download')} Tous les dossiers (CSV)</button>
+          <button class="btn" data-action="export-tasks-csv">Toutes les tâches (CSV)</button>
+          <button class="btn" data-action="export-clients-csv">Tous les dossiers (CSV)</button>
         </div>
       </section>
-      <section class="card"><h2 class="card-t">Données</h2>
+      <section class="card"><h2 class="sec">Données</h2>
         <div class="row-gap">
           <button class="btn" data-action="load-demo">Charger des données de démonstration</button>
-          <button class="btn danger" data-action="reset-all">${ic('trash')} Tout effacer</button>
+          <button class="btn danger" data-action="reset-all">Tout effacer</button>
         </div>
         <p class="small muted">Les échéances générées sont des dates usuelles du calendrier fiscal : elles restent modifiables et sont à vérifier pour chaque dossier.</p>
       </section>
@@ -578,7 +617,7 @@ function openTask(id, preset = {}) {
     const running = existing && Store.s.timer?.taskId === draft.id;
     return `<form class="modal-card" id="tform" autocomplete="off">
       <header class="modal-head">
-        <h2>${existing ? 'Tâche' : 'Nouvelle tâche'} ${existing && T.isOverdue(existing) ? '<span class="pill late">En retard</span>' : ''}</h2>
+        <h2>${existing ? 'Tâche' : 'Nouvelle tâche'} ${existing && T.isOverdue(existing) ? '<span class="late-t small">en retard</span>' : ''}</h2>
         <button type="button" class="icon-btn" data-m="close" aria-label="Fermer">${ic('x')}</button>
       </header>
       <div class="modal-body two">
@@ -602,7 +641,7 @@ function openTask(id, preset = {}) {
               <input id="te-note" placeholder="Note (facultatif)">
               <button type="button" class="btn small-btn" data-m="te-add">Ajouter</button>
             </div>
-            ${existing ? `<button type="button" class="btn small-btn ${running ? 'danger' : ''}" data-m="timer">${running ? ic('stop') + ' Arrêter le chrono' : ic('play') + ' Lancer le chrono'}</button>` : ''}
+            ${existing ? `<button type="button" class="btn small-btn ${running ? 'danger' : ''}" data-m="timer">${running ? 'Arrêter le chrono' : 'Lancer le chrono'}</button>` : ''}
           </section>
 
           <section class="msub">
@@ -624,7 +663,7 @@ function openTask(id, preset = {}) {
         </div>
       </div>
       <footer class="modal-foot">
-        ${existing ? `<button type="button" class="btn ghost danger-t" data-m="delete">${ic('trash')} Supprimer</button><button type="button" class="btn ghost" data-m="duplicate">${ic('copy')} Dupliquer</button>` : ''}
+        ${existing ? `<button type="button" class="btn ghost danger-t" data-m="delete">Supprimer</button><button type="button" class="btn ghost" data-m="duplicate">Dupliquer</button>` : ''}
         <span class="spacer"></span>
         <button type="button" class="btn" data-m="close">Annuler</button>
         <button type="submit" class="btn primary">Enregistrer</button>
@@ -728,6 +767,7 @@ function openClient(id) {
     <div class="modal-body">
       <div class="form-grid">
         ${f('name', 'Nom / raison sociale *', inp('name', 'required autofocus placeholder="Ex. Boulangerie Martin"'))}
+        ${f('code', 'Code dossier', inp('code', 'maxlength="8" placeholder="' + esc(clientCode({ name: c.name || 'Nouveau' })) + ' (auto)" style="text-transform:uppercase"'))}
         ${f('siren', 'SIREN', inp('siren', 'inputmode="numeric" placeholder="123 456 789"'))}
         ${f('forme', 'Forme juridique', `<select name="forme">${FORMES.map(x => opt(x, x, x === c.forme)).join('')}</select>`)}
         ${f('activite', 'Activité', inp('activite', 'placeholder="Ex. Boulangerie-pâtisserie"'))}
@@ -745,7 +785,7 @@ function openClient(id) {
       <label class="field"><span>Notes</span><textarea name="notes" rows="3">${esc(c.notes)}</textarea></label>
     </div>
     <footer class="modal-foot">
-      ${existing ? `<button type="button" class="btn ghost danger-t" data-m="delete">${ic('trash')} Supprimer</button><button type="button" class="btn ghost" data-m="archive">${ic('archive')} ${c.archived ? 'Désarchiver' : 'Archiver'}</button>` : ''}
+      ${existing ? `<button type="button" class="btn ghost danger-t" data-m="delete">Supprimer</button><button type="button" class="btn ghost" data-m="archive">${c.archived ? 'Désarchiver' : 'Archiver'}</button>` : ''}
       <span class="spacer"></span>
       <button type="button" class="btn" data-m="close">Annuler</button>
       <button type="submit" class="btn primary">${existing ? 'Enregistrer' : 'Créer le dossier'}</button>
@@ -765,7 +805,7 @@ function openClient(id) {
     e.preventDefault();
     const el = e.target.elements;
     const out = { ...c };
-    ['name', 'siren', 'forme', 'activite', 'regimeFiscal', 'regimeTva', 'contact', 'email', 'phone', 'honoraires', 'budgetHeures', 'notes'].forEach(k => { out[k] = el[k].value.trim(); });
+    ['name', 'code', 'siren', 'forme', 'activite', 'regimeFiscal', 'regimeTva', 'contact', 'email', 'phone', 'honoraires', 'budgetHeures', 'notes'].forEach(k => { out[k] = el[k].value.trim(); });
     out.jourTva = parseInt(el.jourTva.value, 10) || 19;
     out.paie = el.paie.checked;
     const m = el.cloture.value.trim().match(/^(\d{1,2})\/(\d{1,2})$/);
@@ -776,7 +816,7 @@ function openClient(id) {
     if (!existing) {
       U.toast('Dossier créé');
       location.hash = `#/dossier/${out.id}`;
-      if (confirm('Générer maintenant les échéances de l’année pour ce dossier (TVA, IS, liasse, AG…) ?')) openGenerator([out.id]);
+      if (confirm('Poser maintenant les échéances de l’année pour ce dossier (TVA, IS, liasse, AG…) ?')) openGenerator([out.id]);
     } else { U.toast('Dossier enregistré'); render(); }
   });
 }
@@ -803,7 +843,7 @@ function openGenerator(clientIds) {
     list.forEach(o => (byClient[o.clientId] ||= []).push(o));
     const n = list.filter(o => checked.has(o.key) && !o.exists).length;
     return `<div class="modal-card">
-      <header class="modal-head"><h2>${ic('wand')} Générer les échéances</h2><button type="button" class="icon-btn" data-m="close" aria-label="Fermer">${ic('x')}</button></header>
+      <header class="modal-head"><h2>Poser les échéances</h2><button type="button" class="icon-btn" data-m="close" aria-label="Fermer">${ic('x')}</button></header>
       <div class="modal-body">
         <div class="toolbar">
           <label class="inline">Année / exercice clos en <select id="gen-year">${[thisYear - 1, thisYear, thisYear + 1].map(y => opt(y, y, y === year)).join('')}</select></label>
@@ -914,8 +954,8 @@ const Actions = {
     const spawned = T.setStatus(t, t.status === 'done' ? 'todo' : 'done');
     if (t.status === 'done' && Store.s.timer?.taskId === t.id) stopTimer(true);
     Store.upsertTask(t);
-    if (spawned) { Store.upsertTask(spawned); U.toast(`Terminée ✔ · prochaine occurrence le ${U.fmtDate(spawned.dueDate)}`); }
-    else U.toast(t.status === 'done' ? 'Tâche terminée ✔' : 'Tâche rouverte', 'info');
+    if (spawned) { Store.upsertTask(spawned); U.toast(`Terminée · prochaine occurrence le ${U.fmtDate(spawned.dueDate)}`); }
+    else U.toast(t.status === 'done' ? 'Tâche terminée' : 'Tâche rouverte', 'info');
     render();
   },
   'new-client': () => openClient(null),
@@ -960,7 +1000,7 @@ const Actions = {
   'export-tasks-csv': () => U.download(`taches-${U.today()}.csv`, tasksCSV(Store.tasks().slice().sort(byDue)), 'text/csv'),
   'export-clients-csv': () => U.download(`dossiers-${U.today()}.csv`, U.csv([
     ['Nom', 'SIREN', 'Forme', 'Activité', 'Imposition', 'TVA', 'Clôture', 'Paie', 'Contact', 'E-mail', 'Téléphone', 'Honoraires', 'Budget (h)', 'Archivé'],
-    ...Store.clients(true).map(c => [c.name, c.siren, c.forme, c.activite, c.regimeFiscal, label(REGIMES_TVA, c.regimeTva), fmtCloture(c.cloture), c.paie ? 'Oui' : 'Non', c.contact, c.email, c.phone, c.honoraires, c.budgetHeures, c.archived ? 'Oui' : '']),
+    ...Store.clients(true).map(c => [clientCode(c), c.name, c.siren, c.forme, c.activite, c.regimeFiscal, label(REGIMES_TVA, c.regimeTva), fmtCloture(c.cloture), c.paie ? 'Oui' : 'Non', c.contact, c.email, c.phone, c.honoraires, c.budgetHeures, c.archived ? 'Oui' : '']),
   ]), 'text/csv'),
   'load-demo': () => {
     if (Store.tasks().length && !confirm('Remplacer les données actuelles par les données de démonstration ?')) return;
