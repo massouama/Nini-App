@@ -128,7 +128,7 @@ export function TodayPage() {
 
       <Section title="Aujourd’hui" count={dueToday.length}>
         <TaskList tasks={dueToday} empty="Rien d’autre de prévu aujourd’hui." />
-        <QuickAdd dueDate={ref} placeholder="Ajouter une tâche pour aujourd’hui…" />
+        <QuickAdd dueDate={ref} placeholder="Ajouter une tâche pour aujourd’hui…" chooseClient />
       </Section>
 
       {nowGroups.length > 0 && (

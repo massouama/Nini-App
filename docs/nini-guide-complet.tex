@@ -238,7 +238,7 @@ Clique sur une tâche : elle s’ouvre dans un panneau à droite. \textbf{Tout s
 Statut & \textbf{À faire}, \textbf{En cours}, \textbf{En attente client} (il manque une pièce), \textbf{Terminé}. Passer en « En attente » démarre le compteur de jours depuis la relance. \\ \hline
 Début & Le jour où la tâche apparaît dans « À traiter en ce moment ». \\ \hline
 Échéance & La date de fin. À droite, Nini indique « dans 3 j », « demain » ou « en retard ». \\ \hline
-Dossier & Le client concerné. \\ \hline
+Dossier & Le client concerné. Choisis \btn{Aucun — à lier plus tard} si tu ne sais pas encore : tu pourras le choisir ensuite. \\ \hline
 Priorité & Urgente, Haute, Normale, Basse. Les tâches urgentes ont un rond rouge, les hautes un rond orange. \\ \hline
 Catégorie & Saisie, TVA, Révision… Elle sert aux filtres et aux rapports. \\ \hline
 Estimation & Le temps prévu, en heures. \\ \hline
@@ -306,7 +306,7 @@ Les jours libérés restent libres dans la répartition : tu peux y ajouter un c
 Trois façons :
 \begin{itemize}
   \item le bouton bleu \btn{Nouvelle tâche}, ou la touche \kbd{N} : écris le titre, la tâche est créée ;
-  \item le champ \btn{Ajouter une tâche…} en haut des listes : écris le titre puis \kbd{Entrée} ;
+  \item le champ \btn{Ajouter une tâche…} en haut des listes : écris le titre puis \kbd{Entrée}. À droite du champ, la liste \btn{Lier à : …} rattache directement la tâche à un dossier ;
   \item dans le calendrier : clique sur un jour.
 \end{itemize}
 
@@ -316,6 +316,27 @@ Trois façons :
 \capture{04-taches.jpg}{La liste de toutes les tâches, avec les filtres en haut.}
 Les filtres se combinent : dossier, statut, échéance (en retard, à traiter en ce moment, cette semaine…), catégorie, priorité.
 Un filtre actif s’affiche en bleu. \btn{Effacer les filtres} remet tout à zéro. Le champ \btn{Filtrer…} cherche dans les titres, les notes et les noms de dossiers.
+
+\subsection{Regrouper les tâches}
+La liste \btn{Regrouper…} range les tâches :
+\begin{lexique}
+Par dossier & Un groupe par client (choix par défaut). Les groupes sont repliés : clique sur un nom pour voir ses tâches. \\ \hline
+Par manager & Un groupe par manager, avec sa couleur. \\ \hline
+Par période du mois & Début, milieu, TVA, fin de mois, puis les tâches hors routine. \\ \hline
+Par statut, catégorie, priorité & Pour voir d’un coup tout ce qui est en attente, toutes les TVA, toutes les urgences… \\ \hline
+Sans regroupement & Une seule liste, triée selon le tri choisi. \\ \hline
+\end{lexique}
+\btn{Tout déplier} et \btn{Tout replier} ouvrent ou ferment tous les groupes. Le nombre de tâches en retard s’affiche en rouge sur chaque groupe.
+
+\subsection{Lier une tâche à un dossier}
+\textbf{Dès la création} : dans le champ \btn{Ajouter une tâche…}, choisis le dossier dans la liste à droite (\btn{Lier à : …}), puis écris le titre.
+\capture[0.8\linewidth]{22-ajout-lie.jpg}{Créer une tâche déjà liée à un dossier.}
+\textbf{Plus tard} : une tâche créée sans dossier apparaît dans le groupe \btn{Sans dossier — à lier}.
+Ouvre-la, puis choisis le dossier dans \btn{Dossier}. Elle rejoint aussitôt le groupe de ce dossier.
+\capture[0.8\linewidth]{21-a-lier.jpg}{Le groupe « Sans dossier — à lier ». Les tâches générales du cabinet ont leur propre groupe.}
+\begin{astuce}
+Les \textbf{tâches générales} de la routine (tableau de variation du CA, point avec chaque manager) ne concernent pas un seul dossier : elles sont rangées à part, dans \btn{Tâches générales (cabinet)}.
+\end{astuce}
 
 \subsection{La vue Tableau}
 \capture{05-tableau.jpg}{La vue Tableau : une colonne par statut.}
@@ -399,6 +420,11 @@ Les périodes, leurs dates et leurs étapes se modifient dans \btn{Réglages →
 \capture{08-dossiers.jpg}{La liste des dossiers.}
 Pour chaque dossier : le manager, le temps alloué, l’avancement des échéances de l’année, les tâches ouvertes et en retard, la prochaine échéance et le temps passé.
 Coche \btn{Afficher les archivés} pour voir aussi les dossiers archivés.
+
+\subsection{Regrouper les dossiers}
+La liste \btn{Regrouper par…} range les dossiers par \textbf{manager} (choix par défaut), par \textbf{régime de TVA}, par \textbf{forme juridique} ou par \textbf{imposition}, ou sans regroupement.
+Clique sur l’en-tête d’un groupe pour le replier ou le déplier : il affiche le nombre de dossiers, le temps alloué par mois et les retards.
+\btn{Tout déplier} et \btn{Tout replier} agissent sur tous les groupes. Nini se souvient de ton choix.
 
 \subsection{La fiche d’un dossier}
 \capture{09-fiche.jpg}{La fiche d’un dossier : chiffres, tâches, fiche et notes.}
@@ -582,6 +608,8 @@ Les tâches du mois n’apparaissent pas & \btn{Répartition → Créer les tâc
 Le planning ne me convient pas & Déplace les blocs, ou \btn{Nouvelle proposition}. \\ \hline
 Un dossier a trop ou pas assez de temps & Change son temps alloué dans l’équilibre (à droite du planning), puis \btn{Nouvelle proposition}. \\ \hline
 La date de TVA d’un dossier change & Fiche du dossier → crayon → \btn{Date limite TVA}. \\ \hline
+J’ai créé une tâche sans dossier & Ouvre-la, puis choisis le dossier dans \btn{Dossier}. Les tâches à lier sont regroupées dans \btn{Sans dossier — à lier}. \\ \hline
+Je veux voir mes dossiers autrement & \btn{Dossiers} → \btn{Regrouper par…} : manager, TVA, forme ou imposition. \\ \hline
 Un nouveau client arrive & \btn{Dossiers → Nouveau dossier}, puis pose ses échéances. \\ \hline
 Un client part & Fiche du dossier → \btn{Archiver}. Son historique est gardé. \\ \hline
 Je veux changer une étape pour tous les mois & \btn{Réglages → Routine mensuelle}. \\ \hline

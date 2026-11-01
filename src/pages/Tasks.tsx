@@ -15,9 +15,13 @@ import { usePref } from '../lib/usePref';
 import { CATEGORIES, PRIORITIES, PRIO_RANK, STATUSES } from '../domain/constants';
 import { byDue, clientCode, isOverdue, isStarted, timeSpent } from '../domain/tasks';
 import type { Status, Task } from '../domain/types';
+import { TASK_GROUPINGS, TASK_GROUPS_OPEN_BY_DEFAULT, groupTasks, type TaskGroupBy } from '../domain/grouping';
+import { GroupHeader } from '../components/GroupHeader';
+import { managerColor } from '../components/managers';
+import { ChevronsDownUp, ChevronsUpDown } from 'lucide-react';
 
-interface Filters { client: string; status: string; due: string; category: string; priority: string; sort: string; view: 'list' | 'board' }
-const DEFAULTS: Filters = { client: '', status: 'open', due: '', category: '', priority: '', sort: 'due', view: 'list' };
+interface Filters { client: string; status: string; due: string; category: string; priority: string; sort: string; view: 'list' | 'board'; groupBy: TaskGroupBy; folds: Record<string, boolean> }
+const DEFAULTS: Filters = { client: '', status: 'open', due: '', category: '', priority: '', sort: 'due', view: 'list', groupBy: 'client', folds: {} };
 
 export function TasksPage() {
   const { tasks, clients, settings } = useData();
@@ -69,7 +73,7 @@ export function TasksPage() {
   }, [tasks, clients, settings.routine, f, q, ref]);
 
   const set = (patch: Partial<Filters>) => setF(prev => ({ ...prev, ...patch }));
-  const isFiltered = JSON.stringify({ ...f, view: 'list' }) !== JSON.stringify({ ...DEFAULTS, view: 'list' }) || q;
+  const isFiltered = ['client', 'status', 'due', 'category', 'priority'].some(k => f[k as keyof Filters] !== DEFAULTS[k as keyof Filters]) || q;
   const total = filtered.reduce((s, t) => s + timeSpent(t), 0);
 
   return (
@@ -122,13 +126,18 @@ export function TasksPage() {
             <option value="updated">Modifiées récemment</option>
           </select>
         )}
-        {isFiltered && <button className="btn ghost sm" onClick={() => { setF({ ...DEFAULTS, view: f.view }); setQ(''); }}>Effacer les filtres</button>}
+        {f.view === 'list' && (
+          <select className={f.groupBy !== 'none' ? 'set' : ''} value={f.groupBy} onChange={e => set({ groupBy: e.target.value as TaskGroupBy })} aria-label="Regrouper">
+            {TASK_GROUPINGS.map(g => <option key={g.id} value={g.id}>{g.id === 'none' ? g.label : `Regrouper ${g.label.toLowerCase()}`}</option>)}
+          </select>
+        )}
+        {isFiltered && <button className="btn ghost sm" onClick={() => { setF({ ...DEFAULTS, view: f.view, groupBy: f.groupBy, folds: f.folds }); setQ(''); }}>Effacer les filtres</button>}
       </div>
 
       {f.view === 'list' ? (
         <>
-          <QuickAdd clientId={f.client} />
-          <TaskList tasks={filtered} empty="Aucune tâche ne correspond." />
+          <QuickAdd clientId={f.client} chooseClient />
+          <GroupedTasks tasks={filtered} f={f} set={set} />
         </>
       ) : <Board tasks={filtered} />}
     </div>
@@ -177,6 +186,48 @@ function Board({ tasks }: { tasks: Task[] }) {
                 );
               })}
             </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function GroupedTasks({ tasks, f, set }: { tasks: Task[]; f: Filters; set: (p: Partial<Filters>) => void }) {
+  const { clients, settings } = useData();
+  if (!tasks.length) return <div className="empty-line">Aucune tâche ne correspond.</div>;
+  if (f.groupBy === 'none') return <TaskList tasks={tasks} />;
+  const groups = groupTasks(tasks, f.groupBy, clients, settings.routine);
+  const def = TASK_GROUPS_OPEN_BY_DEFAULT[f.groupBy];
+  const k = (key: string) => `${f.groupBy}:${key}`;
+  const isOpen = (key: string) => f.folds[k(key)] ?? def;
+  const setAll = (open: boolean) => set({ folds: { ...f.folds, ...Object.fromEntries(groups.map(g => [k(g.key), open])) } });
+  const showClient = f.groupBy !== 'client';
+  return (
+    <div className="task-groups">
+      {groups.length > 1 && (
+        <div className="group-tools">
+          <button className="btn ghost sm" onClick={() => setAll(true)}><ChevronsUpDown size={14} /> Tout déplier</button>
+          <button className="btn ghost sm" onClick={() => setAll(false)}><ChevronsDownUp size={14} /> Tout replier</button>
+        </div>
+      )}
+      {groups.map(g => {
+        const late = g.list.filter(t => isOverdue(t)).length;
+        const open = isOpen(g.key);
+        return (
+          <div key={g.key}>
+            <GroupHeader
+              label={g.label} count={g.list.length} open={open} muted={g.tone === 'muted'}
+              onToggle={() => set({ folds: { ...f.folds, [k(g.key)]: !open } })}
+              color={g.manager ? managerColor(clients, g.manager) : undefined}
+              aside={late > 0 ? <span className="late-text">{late} en retard</span> : undefined}
+            />
+            {open && (
+              <div className="group-body">
+                {g.key === '~' && f.groupBy === 'client' && <p className="group-hint">Pour rattacher une tâche à un dossier : ouvre-la, puis choisis le dossier dans « Dossier ».</p>}
+                <TaskList tasks={g.list} showClient={showClient} />
+              </div>
+            )}
           </div>
         );
       })}
