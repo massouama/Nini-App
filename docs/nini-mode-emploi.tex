@@ -1,0 +1,233 @@
+% Nini, mode d’emploi — compiler avec XeLaTeX (polices Inter et DejaVu installées) :
+%   xelatex nini-mode-emploi.tex
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[french]{babel}
+\usepackage{fontspec}
+\setmainfont{Inter}[
+  UprightFont = *-Regular, BoldFont = *-SemiBold,
+  ItalicFont = *-Italic, BoldItalicFont = *-SemiBoldItalic,
+  Extension = .otf ]
+\newfontfamily\displayfont{InterDisplay}[
+  UprightFont = *-Bold, BoldFont = *-Bold, Extension = .otf ]
+\setmonofont{DejaVu Sans Mono}[Scale=0.85]
+\newfontfamily\symb{DejaVu Sans}
+
+\usepackage[a4paper, margin=22mm, top=20mm, bottom=24mm]{geometry}
+\usepackage{xcolor}
+\usepackage{microtype}
+\usepackage{enumitem}
+\usepackage{tabularx}
+\usepackage{colortbl}
+\usepackage{titlesec}
+\usepackage{needspace}
+\usepackage{fancyhdr}
+\usepackage{tikz}
+\usetikzlibrary{babel}
+\usepackage[most]{tcolorbox}
+\usepackage[hidelinks, pdftitle={Nini, mode d'emploi}, pdfauthor={Nini}]{hyperref}
+
+% ---------- Couleurs (celles de l'app) ----------
+\definecolor{accent}{HTML}{3355FF}
+\definecolor{accentsoft}{HTML}{EEF1FF}
+\definecolor{ink}{HTML}{17171C}
+\definecolor{ink2}{HTML}{52525C}
+\definecolor{line}{HTML}{E2E3E9}
+\definecolor{soft}{HTML}{F5F6F9}
+\definecolor{ok}{HTML}{1D9A61}
+\definecolor{oksoft}{HTML}{E9F7F0}
+\definecolor{no}{HTML}{D93F45}
+\definecolor{nosoft}{HTML}{FDEEEE}
+\definecolor{amber}{HTML}{B8780A}
+\definecolor{ambersoft}{HTML}{FFF5E3}
+\definecolor{pink}{HTML}{E0569A}
+\color{ink}
+
+% ---------- Mise en page ----------
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt}
+\linespread{1.15}
+\titleformat{\section}{\needspace{9\baselineskip}\displayfont\fontsize{17}{21}\selectfont}{}{0pt}{}
+\titlespacing*{\section}{0pt}{20pt}{8pt}
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+\fancyfoot[L]{\small\color{ink2}Nini · mode d'emploi}
+\fancyfoot[R]{\small\color{ink2}\thepage}
+
+% ---------- Petits composants ----------
+\newcommand{\muted}[1]{{\color{ink2}#1}}
+\newcommand{\kbd}[1]{\tcbox[on line, boxsep=0pt, left=3pt, right=3pt, top=1.5pt, bottom=1.5pt,
+  colback=soft, colframe=line, boxrule=0.5pt, arc=2pt]{\ttfamily\small #1}}
+\newcommand{\btn}[1]{\textbf{#1}}
+
+% Étapes numérotées dans un rond bleu
+\newcommand{\pastille}[1]{\tcbox[on line, boxrule=0pt, colback=accentsoft, colframe=accentsoft, arc=8pt,
+  boxsep=0pt, left=4.5pt, right=4.5pt, top=3pt, bottom=3pt]{\makebox[0.62em]{\small\bfseries\color{accent}#1}}}
+\newlist{etapes}{enumerate}{1}
+\setlist[etapes]{label=\pastille{\arabic*}, leftmargin=28pt, labelsep=8pt, itemsep=5pt, topsep=4pt}
+
+% Encadrés
+\newtcolorbox{promesse}{enhanced, colback=oksoft, colframe=oksoft, arc=8pt, boxrule=0pt,
+  left=12pt, right=12pt, top=9pt, bottom=9pt}
+\newtcolorbox{note}{enhanced, colback=soft, colframe=soft, arc=8pt, boxrule=0pt,
+  left=12pt, right=12pt, top=8pt, bottom=8pt, before skip=10pt, after skip=6pt}
+
+% Règles : à faire / à ne pas faire
+\newcommand{\regle}[4]{% couleur fond, couleur signe, signe, contenu
+  \begin{tcolorbox}[enhanced, colback=white, colframe=line, boxrule=0.6pt, arc=8pt,
+    left=40pt, right=12pt, top=8pt, bottom=8pt, before skip=0pt, after skip=7pt,
+    overlay={\node[circle, fill=#1, text=#2, minimum size=18pt, inner sep=0pt, font=\bfseries]
+      at ([xshift=20pt, yshift=-17pt]frame.north west) {#3};}]
+  #4
+  \end{tcolorbox}}
+\newcommand{\afaire}[2]{\regle{oksoft}{ok}{{\symb ✓}}{\textbf{#1}\\[1pt]\muted{#2}}}
+\newcommand{\pasfaire}[2]{\regle{nosoft}{no}{{\symb ✕}}{\textbf{#1}\\[1pt]\muted{#2}}}
+
+% Écrans
+\newcommand{\ecran}[2]{\begin{tcolorbox}[colback=white, colframe=line, boxrule=0.6pt, arc=8pt,
+  left=10pt, right=10pt, top=7pt, bottom=7pt, before skip=0pt, after skip=0pt, height=17mm, valign=center]
+  \textbf{#1}\\[1pt]{\small\muted{#2}}\end{tcolorbox}}
+
+\begin{document}
+
+% ---------- Titre ----------
+\begin{tikzpicture}
+  \node[fill=accent, rounded corners=6pt, minimum size=13mm, text=white, font=\displayfont\fontsize{22}{22}\selectfont] {N};
+\end{tikzpicture}
+
+\vspace{6pt}
+{\displayfont\fontsize{30}{34}\selectfont Nini, mode d’emploi\par}
+\vspace{4pt}
+{\large\muted{Nini est ton carnet de travail : tes dossiers, les tâches du mois et ton planning, au même endroit.}\par}
+
+\vspace{8pt}
+\begin{promesse}
+\textbf{Tout reste sur ton ordinateur.}\enspace Nini ne se connecte jamais à Internet. Aucune donnée ne sort.
+\end{promesse}
+
+% ---------- Écrans ----------
+\section{Ce que tu trouves dans Nini}
+\begin{tcbraster}[raster columns=2, raster equal height, raster column skip=8pt, raster row skip=8pt]
+  \ecran{Aujourd’hui}{Les dossiers prévus ce jour, les retards, la semaine.}
+  \ecran{Répartition}{Le planning du mois : quel dossier, quel jour, combien de temps.}
+  \ecran{Toutes les tâches}{La liste complète, avec des filtres.}
+  \ecran{Dossiers}{Chaque client, son manager, son temps alloué.}
+  \ecran{Rapports}{Ce qui est fait et ce qui reste, à imprimer ou en Excel.}
+  \ecran{Réglages}{Sauvegardes et routine du mois.}
+\end{tcbraster}
+
+% ---------- Le mois type ----------
+\section{Le mois type}
+\muted{Chaque dossier passe par ces quatre périodes. Nini crée les tâches et les étapes à cocher pour chacune.}
+
+\vspace{4pt}
+\begin{tikzpicture}[x=0.995\linewidth/31]
+  \def\h{3.05}
+  % fonds des périodes
+  \fill[accentsoft, rounded corners=6pt] (0,0) rectangle (10,\h);
+  \fill[white] (10,0) rectangle (17,\h);
+  \fill[ambersoft] (17,0) rectangle (24,\h);
+  \fill[white, rounded corners=6pt] (24,0) rectangle (31,\h);
+  \draw[line, rounded corners=6pt, line width=0.6pt] (0,0) rectangle (31,\h);
+  \foreach \x in {10,17,24} \draw[line, line width=0.6pt] (\x,0) -- (\x,\h);
+  % textes
+  \newcommand{\periode}[5]{%
+    \node[anchor=north west, text width=#2*\linewidth/31-14pt, align=left, inner sep=0pt] at (#1+0.35,\h-0.18) {%
+      {\ttfamily\small\color{ink2}#3}\\[2pt]\textbf{#4}\\[2pt]{\footnotesize\color{ink2}#5}};}
+  \periode{0}{10}{1 → 10}{Début de mois}{Banque, recettes, lettrage, 471, balance. À finir avant le 17.}
+  \periode{10}{7}{11 → 17}{Milieu}{Achats, paie, OD, états manquants.}
+  \periode{17}{7}{18 → 24}{TVA}{Déclarations du 19, du 21 et du 24. Révision.}
+  \periode{24}{7}{25 → fin}{Fin de mois}{Tableaux de bord, finalisation, point manager.}
+  % semaine réservée
+  \fill[pink, rounded corners=1.5pt] (4,-0.5) rectangle (10,-0.36);
+  \node[anchor=west, font=\footnotesize, text=ink2] at (10.3,-0.43) {Du 5 au 10 : semaine réservée au dossier de la période réservée.};
+\end{tikzpicture}
+
+% ---------- Début de mois ----------
+\section[Le 1er jour du mois]{Le 1\textsuperscript{er} jour du mois}
+\begin{etapes}
+  \item Ouvre \btn{Répartition}.
+  \item Clique sur \btn{Créer les tâches du mois}.
+  \item Clique sur \btn{Proposer une répartition}.
+  \item Ajuste si besoin : fais glisser un bloc vers un autre jour, ou clique dessus pour changer la durée.
+\end{etapes}
+
+% ---------- Chaque jour ----------
+\section{Chaque jour}
+\begin{etapes}
+  \item Ouvre Nini : \btn{Au programme aujourd’hui} te montre tes dossiers du jour.
+  \item Clique sur un dossier : la tâche de la période s’ouvre.
+  \item Coche les étapes au fur et à mesure. Tout s’enregistre tout seul.
+  \item Note ton temps : bouton \btn{Chrono}, ou saisis « 1h30 ».
+\end{etapes}
+\begin{note}
+Raccourcis : \kbd{N} crée une tâche, \kbd{Ctrl} + \kbd{K} retrouve n’importe quoi.
+\end{note}
+
+% ---------- Changer d'appareil ----------
+\section{Changer d’appareil}
+\muted{Par exemple pour passer de l’ordinateur à la tablette.}
+\begin{etapes}
+  \item Sur l’appareil où tu as travaillé : \btn{Exporter une sauvegarde}.
+  \item Transporte le fichier : câble, clé USB ou lecteur du cabinet.
+  \item Sur l’autre appareil : \btn{Réglages → Restaurer}, puis choisis le fichier.
+\end{etapes}
+\begin{note}
+\textbf{Une seule règle :} ne travaille jamais sur deux appareils en même temps. La restauration remplace tout ce qu’il y avait avant.
+\end{note}
+
+% ---------- iPad ----------
+\section{Sur l’iPad}
+\muted{L’iPad n’ouvre pas le fichier Nini.html. On installe Nini comme une app, une seule fois.}
+\begin{etapes}
+  \item Avec Internet, une seule fois : ouvre l’adresse de Nini dans \btn{Safari}.
+  \item Touche \btn{Partager → Sur l’écran d’accueil → Ajouter}. L’icône bleue « N » apparaît.
+  \item Ouvre Nini \btn{depuis son icône}, puis \btn{Réglages → Restaurer} avec ta sauvegarde reçue par AirDrop.
+  \item C’est tout : coupe le Wi-Fi ou passe en mode avion, Nini fonctionne.
+\end{etapes}
+\begin{note}
+\textbf{Attention :} ne supprime pas l’icône de Nini. Cela effacerait tes données sur l’iPad.
+Pour sauvegarder depuis l’iPad : \btn{Exporter une sauvegarde}, puis AirDrop ou « Enregistrer dans Fichiers ».
+\end{note}
+
+% ---------- Sécurité ----------
+\section{Les règles de sécurité}
+\afaire{Sauvegarde chaque vendredi.}{Réglages → Exporter une sauvegarde. Range le fichier sur le lecteur du cabinet. Nini te le rappelle après 7 jours.}
+\afaire{Verrouille ton ordinateur quand tu t’absentes.}{Touches \kbd{Windows} + \kbd{L}. Nini n’a pas de mot de passe : il est protégé par ta session.}
+\afaire{Ouvre toujours Nini de la même façon.}{Même fichier, même endroit, même navigateur (Edge ou Chrome).}
+\pasfaire{Ne vide pas les données du navigateur.}{Cela efface Nini. Si c’est arrivé : Réglages → Restaurer ta dernière sauvegarde.}
+\pasfaire{N’utilise pas la navigation privée.}{Tout serait perdu à la fermeture de la fenêtre.}
+\pasfaire{N’envoie pas une sauvegarde par mail perso, WhatsApp ou cloud perso.}{Elle contient les noms des clients. C’est un document confidentiel du cabinet.}
+
+% ---------- Preuve ----------
+\section{Prouver qu’aucune donnée ne sort}
+Nini tient un \btn{journal de sécurité} sur chaque appareil : \btn{Réglages → Sécurité}.
+\begin{etapes}
+  \item Vérifie le bandeau vert : \btn{Verrou réseau actif}.
+  \item Clique sur \btn{Tester le verrou} : Nini essaie d’envoyer des données de 4 façons. Les 4 doivent être \btn{bloquées}.
+  \item Le compteur \btn{requête vers l’extérieur} doit rester à \btn{0}. Sinon, le bandeau devient rouge.
+  \item \btn{Exporter le journal} donne un fichier Excel daté, à garder ou à montrer.
+\end{etapes}
+\begin{note}
+\textbf{Vérifier sans faire confiance à Nini :} sur le PC, touche \kbd{F12} → onglet \btn{Réseau} : aucune ligne ne doit apparaître quand tu utilises Nini.
+Sur l’iPad : passe en mode avion, Nini fonctionne exactement pareil.
+\end{note}
+
+% ---------- En cas de souci ----------
+\section{En cas de souci}
+{\renewcommand{\arraystretch}{1.55}
+\arrayrulecolor{line}
+\begin{tabularx}{\linewidth}{@{}>{\bfseries\raggedright\arraybackslash}p{0.38\linewidth}>{\raggedright\arraybackslash\leavevmode\color{ink2}}X@{}}
+\hline
+Je ne vois plus mes dossiers & Réglages → Restaurer, puis choisis ta dernière sauvegarde. \\ \hline
+J’ai coché une tâche par erreur & Clique sur « Annuler » dans le message en bas de l’écran, ou décoche-la. \\ \hline
+Le planning ne me convient pas & Déplace les blocs à la main, ou clique sur « Nouvelle proposition ». \\ \hline
+Un dossier arrive ou s’arrête & Dossiers → Nouveau dossier, ou Archiver dans la fiche du dossier. \\ \hline
+La date de TVA d’un dossier change & Fiche du dossier → Modifier → Date limite TVA (19, 21 ou 24). \\ \hline
+\end{tabularx}}
+
+\vfill
+{\small\muted{Les dates proposées par Nini sont des repères. En cas de doute sur une échéance, la règle du cabinet prime.}}
+
+\end{document}
