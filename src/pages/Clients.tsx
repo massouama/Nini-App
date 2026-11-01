@@ -7,7 +7,9 @@ import { useData } from '../data/StoreContext';
 import { fmtDate } from '../lib/dates';
 import { fmtMin, pct } from '../lib/format';
 import { usePref } from '../lib/usePref';
+import { managerColor } from '../components/managers';
 import { REGIMES_TVA } from '../domain/constants';
+import { fmtDays } from '../domain/planning';
 import { clientStats } from '../domain/stats';
 import { clientCode } from '../domain/tasks';
 
@@ -47,7 +49,7 @@ export function ClientsPage() {
       ) : (
         <div className="client-table" role="table">
           <div className="ct-head" role="row">
-            <span>Dossier</span><span>Régime</span><span>Clôture</span><span>Échéances {year}</span><span className="num">Ouvertes</span><span>Prochaine échéance</span><span className="num">Temps</span>
+            <span>Dossier</span><span>Manager</span><span>Alloué</span><span>Échéances {year}</span><span className="num">Ouvertes</span><span>Prochaine échéance</span><span className="num">Temps</span>
           </div>
           {list.map(c => {
             const st = clientStats(c, tasks, year);
@@ -57,10 +59,10 @@ export function ClientsPage() {
                 onClick={() => navigate(`/dossiers/${c.id}`)} onKeyDown={e => { if (e.key === 'Enter') navigate(`/dossiers/${c.id}`); }}>
                 <span className="ct-name">
                   <span className="code lg">{clientCode(c)}</span>
-                  <span><b>{c.name}</b><small>{c.forme}{c.activite ? ` · ${c.activite}` : ''}</small></span>
+                  <span><b>{c.name}</b><small>{[c.forme, REGIMES_TVA.find(r => r.id === c.regimeTva)?.short, c.activite].filter(Boolean).join(' · ')}</small></span>
                 </span>
-                <span className="small">{c.regimeFiscal} · {REGIMES_TVA.find(r => r.id === c.regimeTva)?.short}{c.paie ? ' · Paie' : ''}</span>
-                <span className="small mono">{c.cloture.split('-').reverse().join('/')}</span>
+                <span className="small manager-cell">{c.manager ? <><i style={{ background: managerColor(clients, c.manager) }} />{c.manager}</> : <span className="muted">—</span>}</span>
+                <span className="small mono">{c.joursMois ? fmtDays(c.joursMois) : '—'}</span>
                 <span className="ct-progress">
                   <span className="meter"><span style={{ width: `${pct(st.yearDone, st.yearTotal)}%` }} /></span>
                   <small>{st.yearDone}/{st.yearTotal}</small>

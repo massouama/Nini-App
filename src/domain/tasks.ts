@@ -1,9 +1,10 @@
 import { addDays, addMonths, fmtDate, isoFromMs, today } from '../lib/dates';
 import { uid } from '../lib/format';
 import { PRIORITIES, PRIO_RANK, STATUSES, label } from './constants';
+import { DEFAULT_ROUTINE } from './routine';
 import type { Client, LogEntry, Settings, Status, Task } from './types';
 
-export const defaultSettings = (): Settings => ({ profileName: '', timer: null, lastBackup: null });
+export const defaultSettings = (): Settings => ({ profileName: '', timer: null, lastBackup: null, routine: structuredClone(DEFAULT_ROUTINE), plans: {} });
 
 export function newTask(preset: Partial<Task> = {}): Task {
   const now = Date.now();
@@ -21,6 +22,7 @@ export function newClient(preset: Partial<Client> = {}): Client {
     id: uid(), name: '', code: '', siren: '', forme: 'SARL', activite: '', regimeFiscal: 'IS', regimeTva: 'mensuel',
     jourTva: 19, cloture: '12-31', paie: false, contact: '', email: '', phone: '',
     honoraires: '', budgetHeures: '', notes: '', archived: false, createdAt: Date.now(),
+    manager: '', joursMois: 0, fenetre: null,
     ...preset,
   };
 }

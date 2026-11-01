@@ -12,6 +12,7 @@ import { useData, useStore } from '../data/StoreContext';
 import { eur, fmtMin, pct } from '../lib/format';
 import { REGIMES_TVA } from '../domain/constants';
 import { clientStats } from '../domain/stats';
+import { fmtDays } from '../domain/planning';
 import { byDue, clientCode, isOpen } from '../domain/tasks';
 
 export function ClientDetailPage() {
@@ -60,6 +61,9 @@ export function ClientDetailPage() {
   };
 
   const facts: [string, React.ReactNode][] = [
+    ['Manager', c.manager],
+    ['Temps alloué', c.joursMois ? `${fmtDays(c.joursMois)} / mois${c.fenetre ? ` (du ${c.fenetre.from} au ${c.fenetre.to})` : ''}` : ''],
+    ['TVA au', c.regimeTva !== 'franchise' ? `${c.jourTva} du mois` : ''],
     ['SIREN', c.siren],
     ['Forme', c.forme],
     ['Imposition', c.regimeFiscal === 'IS' ? 'Impôt sur les sociétés' : 'Impôt sur le revenu'],

@@ -1,7 +1,7 @@
 import { isoFromMs } from '../lib/dates';
 import { fmtMin, uid } from '../lib/format';
 import { changeTask, defaultSettings, logEntry, withStatus } from '../domain/tasks';
-import type { Client, Data, Settings, Status, Task } from '../domain/types';
+import type { Client, Data, PlanBlock, RoutinePhase, Settings, Status, Task } from '../domain/types';
 import type { Repo } from './repo';
 
 export interface StoreState {
@@ -132,6 +132,16 @@ export class AppStore {
     const settings = { ...this.data.settings, ...patch };
     this.setData({ settings });
     this.persist(this.repo.saveSettings(settings));
+  }
+
+  setPlan(month: string, blocks: PlanBlock[] | null) {
+    const plans = { ...this.data.settings.plans };
+    if (blocks) plans[month] = blocks; else delete plans[month];
+    this.setSettings({ plans });
+  }
+
+  setRoutine(routine: RoutinePhase[]) {
+    this.setSettings({ routine });
   }
 
   startTimer(taskId: string) {

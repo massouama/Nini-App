@@ -51,9 +51,46 @@ export interface Client {
   notes: string;
   archived: boolean;
   createdAt: number;
+  /** Manager responsable du dossier. */
+  manager: string;
+  /** Temps alloué au dossier, en jours par mois. */
+  joursMois: number;
+  /** Période réservée dans le mois (ex. du 5 au 10), ou null. */
+  fenetre: { from: number; to: number } | null;
+}
+
+/** Une période de la routine mensuelle (ex. « Début de mois », du 1er au 10, à finir le 17). */
+export interface RoutinePhase {
+  id: string;
+  title: string;
+  /** Jours du mois sur lesquels le travail est planifié. */
+  from: number;
+  to: number;
+  /** Échéance : un jour du mois, la date limite TVA du dossier, ou le dernier jour ouvré. */
+  due: number | 'tva' | 'last';
+  /** Une tâche par dossier, une seule tâche, ou une par manager. */
+  scope: 'client' | 'global' | 'manager';
+  category: string;
+  steps: string[];
+}
+
+/** Un bloc de temps planifié : tel dossier, tel jour, pour tant de jours (multiples de 0,125). */
+export interface PlanBlock {
+  id: string;
+  date: string;
+  clientId: string;
+  days: number;
+  phaseId: string;
 }
 
 export interface Timer { taskId: string; start: number }
-export interface Settings { profileName: string; timer: Timer | null; lastBackup: number | null }
+export interface Settings {
+  profileName: string;
+  timer: Timer | null;
+  lastBackup: number | null;
+  routine: RoutinePhase[];
+  /** Répartition par mois (« AAAA-MM »). */
+  plans: Record<string, PlanBlock[]>;
+}
 
 export interface Data { clients: Client[]; tasks: Task[]; settings: Settings }

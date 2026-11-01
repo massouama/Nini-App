@@ -1,4 +1,4 @@
-import { CalendarDays, FolderPlus, Sparkles } from 'lucide-react';
+import { CalendarDays, CalendarRange, FolderPlus, Sparkles } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { PageHeader, Section } from '../components/PageHeader';
 import { QuickAdd } from '../components/QuickAdd';
@@ -8,12 +8,16 @@ import { useData, useStore } from '../data/StoreContext';
 import { addDays, capitalize, fmtWeekday, today } from '../lib/dates';
 import { plural } from '../lib/format';
 import { demoData } from '../domain/demo';
-import { byDue, isOpen, isOverdue } from '../domain/tasks';
+import { fmtDays } from '../domain/planning';
+import { byDue, clientCode, isOpen, isOverdue } from '../domain/tasks';
+import { managerColor } from '../components/managers';
+import { useTaskNav } from '../components/useTaskNav';
 
 export function TodayPage() {
   const { clients, tasks, settings } = useData();
   const store = useStore();
   const dialogs = useDialogs();
+  const nav = useTaskNav();
   const ref = today();
 
   if (!clients.length && !tasks.length) {
@@ -33,6 +37,8 @@ export function TodayPage() {
     );
   }
 
+  const todayBlocks = (settings.plans[ref.slice(0, 7)] ?? []).filter(b => b.date === ref);
+  const phase = settings.routine.find(p => p.scope === 'client' && +ref.slice(8) >= p.from && +ref.slice(8) <= p.to);
   const open = tasks.filter(isOpen);
   const active = open.filter(t => t.status !== 'waiting');
   const overdue = active.filter(t => isOverdue(t, ref)).sort(byDue);
@@ -56,6 +62,32 @@ export function TodayPage() {
         title="Aujourd’hui"
         subtitle={<span className="stats">{summary}</span>}
       />
+
+      <Section title="Au programme aujourd’hui" aside={<Link to="/repartition" className="link-muted"><CalendarRange size={13} /> Répartition</Link>}>
+        {phase && <p className="phase-line">Période : <b>{phase.title}</b>{phase.due === 'tva' ? ' · TVA au 19, 21 ou 24 selon le dossier' : typeof phase.due === 'number' ? ` · à finaliser avant le ${phase.due}` : ' · jusqu’à la fin du mois'}</p>}
+        {todayBlocks.length ? (
+          <div className="today-plan">
+            {todayBlocks.map(b => {
+              const c = clients.find(x => x.id === b.clientId);
+              if (!c) return null;
+              const month = ref.slice(0, 7);
+              const task = tasks.find(t => t.key === `${c.id}|routine|${b.phaseId}|${month}`)
+                ?? tasks.filter(t => t.clientId === c.id && isOpen(t) && t.key?.endsWith(`|${month}`)).sort(byDue)[0];
+              const done = task?.checklist.filter(x => x.done).length ?? 0;
+              const style = { ['--mc' as string]: managerColor(clients, c.manager) };
+              const body = <>
+                <span className="code">{clientCode(c)}</span><b className="ellipsis">{c.name}</b>
+                <span className="muted">{fmtDays(b.days)}{task && task.checklist.length ? ` · ${done}/${task.checklist.length}` : ''}</span>
+              </>;
+              return task
+                ? <button key={b.id} className="today-block" style={style} onClick={() => nav.open(task.id)} title={task.title}>{body}</button>
+                : <Link key={b.id} to={`/dossiers/${c.id}`} className="today-block" style={style}>{body}</Link>;
+            })}
+          </div>
+        ) : (
+          <div className="empty-line">{settings.plans[ref.slice(0, 7)]?.length ? 'Aucun dossier planifié aujourd’hui.' : <>Pas encore de répartition pour ce mois. <Link to="/repartition">La proposer</Link></>}</div>
+        )}
+      </Section>
 
       {overdue.length > 0 && (
         <Section title="En retard" count={overdue.length} tone="late">

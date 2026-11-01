@@ -27,6 +27,14 @@ Pour régénérer le fichier après une modification du code : `npm run build:of
 - **Panneau de tâche** : enregistrement automatique, statut, échéance, priorité, catégorie, estimation, **récurrence** (l'occurrence suivante est créée quand la tâche est terminée), **étapes**, **temps passé** (saisie libre « 1h30 » ou **chrono**), **fil d'activité** (commentaires et historique automatique des changements).
 - **Dossiers** : forme juridique, IS/IR, régime de TVA, clôture, paie, contact, honoraires, **budget temps**, notes ; avancement de l'année et retards par dossier ; archivage.
 - **Poser les échéances** : crée en un clic les tâches de l'année pour un ou plusieurs dossiers : TVA (CA3 mensuelle ou trimestrielle, acomptes et CA12), paie et DSN, collecte des pièces, révision, liasse (2065, 2031/2035, 2072), acomptes et solde d'IS, AG, dépôt au greffe, CFE. Une échéance déjà créée ne l'est jamais deux fois.
+- **Répartition du mois** : chaque dossier a un manager et un temps alloué (en jours par mois). L'app propose un planning jour par jour :
+  - les dossiers ayant une période réservée (par exemple du 5 au 10) sont placés en premier ;
+  - le temps de chaque dossier est réparti sur les périodes de la routine (début, milieu, TVA, fin) ;
+  - en période TVA, les dossiers dont la date limite (19, 21 ou 24) est la plus proche passent en premier ;
+  - un dossier sans TVA n'est jamais placé en période TVA.
+
+  Tout se modifie ensuite à la main : glisser-déposer d'un jour à l'autre, durée, ajout et suppression de créneaux, temps alloué. Le tableau « Équilibre » montre l'écart entre le temps planifié et le temps alloué.
+- **Routine mensuelle** modifiable (*Réglages*) : périodes, échéances et étapes. Le bouton « Créer les tâches du mois » génère une tâche par dossier et par période, avec ses étapes à cocher, plus le tableau de variation du CA et un point par manager.
 - **Calendrier** mensuel des échéances.
 - **Rapports** par période et par dossier : travaux réalisés, reste à faire, retards, temps passé. **Impression / PDF** et **export Excel (CSV)**.
 - **Palette de commandes** (`⌘K` / `Ctrl+K`), raccourci `N` pour une nouvelle tâche, **annulation** après une suppression ou une tâche cochée.

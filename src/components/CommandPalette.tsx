@@ -1,5 +1,5 @@
 import { Command } from 'cmdk';
-import { CalendarDays, FileText, FolderOpen, FolderPlus, Inbox, ListTodo, Pause, Play, Plus, Settings, Sun } from 'lucide-react';
+import { CalendarDays, CalendarRange, FileText, FolderOpen, FolderPlus, Inbox, ListTodo, Pause, Play, Plus, Settings, Sun } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useData, useStore } from '../data/StoreContext';
@@ -48,6 +48,7 @@ export function CommandPalette({ open, onOpenChange }: { open: boolean; onOpenCh
           <Command.Item onSelect={() => run(() => navigate('/'))}><Sun size={15} /> Aujourd’hui</Command.Item>
           <Command.Item onSelect={() => run(() => navigate('/taches'))}><ListTodo size={15} /> Toutes les tâches</Command.Item>
           <Command.Item onSelect={() => run(() => navigate('/dossiers'))}><FolderOpen size={15} /> Dossiers</Command.Item>
+          <Command.Item onSelect={() => run(() => navigate('/repartition'))}><CalendarRange size={15} /> Répartition du mois</Command.Item>
           <Command.Item onSelect={() => run(() => navigate('/calendrier'))}><CalendarDays size={15} /> Calendrier</Command.Item>
           <Command.Item onSelect={() => run(() => navigate('/rapports'))}><FileText size={15} /> Rapports</Command.Item>
           <Command.Item onSelect={() => run(() => navigate('/reglages'))}><Settings size={15} /> Réglages</Command.Item>

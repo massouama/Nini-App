@@ -4,6 +4,7 @@ import { PageHeader, Section } from '../components/PageHeader';
 import { useConfirm } from '../components/ui/Confirm';
 import { useToast } from '../components/ui/Toasts';
 import { useBackup } from '../components/useBackup';
+import { RoutineEditor } from '../components/RoutineEditor';
 import { useData, useStore } from '../data/StoreContext';
 import { normalizeData } from '../data/normalize';
 import { supabase } from '../data/supabase';
@@ -75,6 +76,12 @@ export function SettingsPage({ email }: { email?: string }) {
         <label className="field"><span>Prénom (affiché sur l’accueil et les rapports)</span>
           <input value={name} onChange={e => setName(e.target.value)} placeholder="Nini" />
         </label>
+      </Section>
+
+      <Section title="Routine mensuelle">
+        <p className="muted small">Chaque mois, « Créer les tâches du mois » (page Répartition) génère ces tâches avec leurs étapes à cocher.
+          Les périodes servent aussi à proposer la répartition du temps.</p>
+        <RoutineEditor />
       </Section>
 
       <Section title="Synchronisation">

@@ -1,4 +1,4 @@
-import { CalendarDays, Cloud, DownloadCloud, FileText, FolderOpen, HardDrive, ListTodo, Pause, Plus, Search, Settings, Sun } from 'lucide-react';
+import { CalendarDays, CalendarRange, Cloud, DownloadCloud, FileText, FolderOpen, HardDrive, ListTodo, Pause, Plus, Search, Settings, Sun } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import { useData, useStore } from '../data/StoreContext';
 import { today } from '../lib/dates';
@@ -7,6 +7,7 @@ import { clientStats } from '../domain/stats';
 import { clientCode, isOpen, isOverdue } from '../domain/tasks';
 import { useToast } from './ui/Toasts';
 import { useBackup } from './useBackup';
+import { managerColor, managersOf } from './managers';
 import { useNow } from './useNow';
 import { useTaskNav } from './useTaskNav';
 
@@ -22,6 +23,10 @@ export function Sidebar({ onSearch, open, onNavigate }: { onSearch: () => void; 
   const todayCount = tasks.filter(t => isOpen(t) && t.dueDate && t.dueDate <= ref).length;
   const lateCount = tasks.filter(t => isOverdue(t, ref)).length;
   const active = clients.filter(c => !c.archived).sort((a, b) => a.name.localeCompare(b.name, 'fr'));
+  const groups = [
+    ...managersOf(active).map(m => ({ name: m, color: managerColor(active, m), list: active.filter(c => c.manager.trim() === m) })),
+    { name: 'Autres dossiers', color: 'var(--line-strong)', list: active.filter(c => !c.manager.trim()) },
+  ].filter(g => g.list.length);
 
   const link = (to: string, icon: React.ReactNode, text: string, count?: number, tone?: 'late') => (
     <NavLink to={to} end={to === '/'} className="nav-link" onClick={onNavigate}>
@@ -40,21 +45,27 @@ export function Sidebar({ onSearch, open, onNavigate }: { onSearch: () => void; 
       <nav className="side-nav">
         {link('/', <Sun size={16} />, 'Aujourd’hui', todayCount, lateCount ? 'late' : undefined)}
         {link('/taches', <ListTodo size={16} />, 'Toutes les tâches')}
+        {link('/repartition', <CalendarRange size={16} />, 'Répartition')}
         {link('/calendrier', <CalendarDays size={16} />, 'Calendrier')}
         {link('/rapports', <FileText size={16} />, 'Rapports')}
         {link('/dossiers', <FolderOpen size={16} />, 'Dossiers')}
       </nav>
 
       <div className="side-clients">
-        {active.map(c => {
-          const st = clientStats(c, tasks);
-          return (
-            <NavLink key={c.id} to={`/dossiers/${c.id}`} className="nav-link client-link" onClick={onNavigate}>
-              <span className="code">{clientCode(c)}</span><span className="ellipsis">{c.name}</span>
-              {st.overdue ? <b className="nav-count late">{st.overdue}</b> : st.open.length ? <b className="nav-count">{st.open.length}</b> : null}
-            </NavLink>
-          );
-        })}
+        {groups.map(g => (
+          <div key={g.name} className="side-group">
+            {groups.length > 1 && <div className="side-group-title"><i style={{ background: g.color }} />{g.name}</div>}
+            {g.list.map(c => {
+              const st = clientStats(c, tasks);
+              return (
+                <NavLink key={c.id} to={`/dossiers/${c.id}`} className="nav-link client-link" onClick={onNavigate}>
+                  <span className="code">{clientCode(c)}</span><span className="ellipsis">{c.name}</span>
+                  {st.overdue ? <b className="nav-count late">{st.overdue}</b> : st.open.length ? <b className="nav-count">{st.open.length}</b> : null}
+                </NavLink>
+              );
+            })}
+          </div>
+        ))}
       </div>
 
       <div className="side-bottom">

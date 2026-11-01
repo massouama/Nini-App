@@ -2,6 +2,7 @@ import { useEffect, useState, type ReactNode } from 'react';
 import { useData, useStore } from '../data/StoreContext';
 import { FORMES, REGIMES_TVA } from '../domain/constants';
 import { clientCode, newClient } from '../domain/tasks';
+import { managersOf } from './managers';
 import type { Client } from '../domain/types';
 import { Dialog } from './ui/Dialog';
 import { useToast } from './ui/Toasts';
@@ -22,6 +23,7 @@ export function ClientDialog({ open, clientId, onClose, onCreated }: {
   const existing = clientId ? clients.find(c => c.id === clientId) : undefined;
   const [c, setC] = useState<Client>(newClient());
   const [cloture, setCloture] = useState('31/12');
+  const managers = managersOf(clients);
 
   useEffect(() => {
     if (!open) return;
@@ -67,6 +69,23 @@ export function ClientDialog({ open, clientId, onClose, onCreated }: {
         </Field>
         <Field label="Activité">{text('activite', { placeholder: 'Boulangerie-pâtisserie' })}</Field>
 
+        <h4 className="form-sec">Organisation</h4>
+        <Field label="Manager">
+          <input list="managers-list" value={c.manager} placeholder="Prénom du manager" onChange={e => set('manager', e.target.value)} />
+          <datalist id="managers-list">{managers.map(m => <option key={m} value={m} />)}</datalist>
+        </Field>
+        <Field label="Temps alloué (jours / mois)">
+          <input type="number" min={0} step={0.125} value={c.joursMois} onChange={e => set('joursMois', Math.max(0, Number(e.target.value) || 0))} />
+        </Field>
+        <label className="switch wide">
+          <input type="checkbox" checked={!!c.fenetre} onChange={e => set('fenetre', e.target.checked ? { from: 5, to: 10 } : null)} />
+          <span>Période réservée dans le mois</span>
+        </label>
+        {c.fenetre && <>
+          <Field label="Du (jour du mois)"><input type="number" min={1} max={31} value={c.fenetre.from} onChange={e => set('fenetre', { ...c.fenetre!, from: Number(e.target.value) || 1 })} /></Field>
+          <Field label="Au (jour du mois)"><input type="number" min={1} max={31} value={c.fenetre.to} onChange={e => set('fenetre', { ...c.fenetre!, to: Number(e.target.value) || 1 })} /></Field>
+        </>}
+
         <h4 className="form-sec">Fiscalité</h4>
         <Field label="Imposition des bénéfices">
           <select value={c.regimeFiscal} onChange={e => set('regimeFiscal', e.target.value as Client['regimeFiscal'])}>
@@ -80,7 +99,12 @@ export function ClientDialog({ open, clientId, onClose, onCreated }: {
             {REGIMES_TVA.map(r => <option key={r.id} value={r.id}>{r.label}</option>)}
           </select>
         </Field>
-        <Field label="Jour limite de dépôt TVA"><input type="number" min={1} max={28} value={c.jourTva} onChange={e => set('jourTva', Number(e.target.value))} /></Field>
+        <Field label="Date limite TVA">
+          <select value={[19, 21, 24].includes(c.jourTva) ? c.jourTva : 'autre'} onChange={e => e.target.value !== 'autre' && set('jourTva', Number(e.target.value))}>
+            <option value={19}>Le 19</option><option value={21}>Le 21</option><option value={24}>Le 24</option>
+            {![19, 21, 24].includes(c.jourTva) && <option value="autre">Le {c.jourTva}</option>}
+          </select>
+        </Field>
         <label className="switch wide">
           <input type="checkbox" checked={c.paie} onChange={e => set('paie', e.target.checked)} />
           <span>Le cabinet gère la paie (DSN mensuelle)</span>

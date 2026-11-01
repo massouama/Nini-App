@@ -19,6 +19,7 @@ import { CalendarPage } from './pages/Calendar';
 import { ClientDetailPage } from './pages/ClientDetail';
 import { ClientsPage } from './pages/Clients';
 import { LoginPage } from './pages/Login';
+import { PlanningPage } from './pages/Planning';
 import { ReportsPage } from './pages/Reports';
 import { SettingsPage } from './pages/Settings';
 import { TasksPage } from './pages/Tasks';
@@ -111,6 +112,7 @@ function Layout({ email }: { email?: string }) {
           <Route path="/dossiers" element={<ClientsPage />} />
           <Route path="/dossiers/:id" element={<ClientDetailPage />} />
           <Route path="/calendrier" element={<CalendarPage />} />
+          <Route path="/repartition" element={<PlanningPage />} />
           <Route path="/rapports" element={<ReportsPage />} />
           <Route path="/reglages" element={<SettingsPage email={email} />} />
           <Route path="*" element={<Navigate to="/" replace />} />

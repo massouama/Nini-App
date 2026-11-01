@@ -13,10 +13,12 @@ export function normalizeData(raw: unknown): Data {
     ...(legacy.lastBackup ? { lastBackup: legacy.lastBackup } : {}),
     ...((r.settings as Partial<Settings>) ?? {}),
   };
+  if (!Array.isArray(settings.routine) || !settings.routine.length) settings.routine = defaultSettings().routine;
+  if (!settings.plans || typeof settings.plans !== 'object') settings.plans = {};
   return {
     clients: (r.clients as Partial<Client>[]).map(c => {
       const n = normalizeClient(c);
-      return { ...n, honoraires: String(n.honoraires ?? ''), budgetHeures: String(n.budgetHeures ?? '') };
+      return { ...n, honoraires: String(n.honoraires ?? ''), budgetHeures: String(n.budgetHeures ?? ''), joursMois: Number(n.joursMois) || 0 };
     }),
     tasks: (r.tasks as Partial<Task>[]).map(t => {
       const n = normalizeTask(t);

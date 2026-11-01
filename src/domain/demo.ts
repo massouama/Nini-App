@@ -1,6 +1,8 @@
 import { addDays, addMonths, parse, today as todayIso } from '../lib/dates';
 import { uid } from '../lib/format';
 import { obligationToTask, obligationsFor } from './obligations';
+import { buildPlan } from './planning';
+import { DEFAULT_ROUTINE } from './routine';
 import { defaultSettings, logEntry, newClient, newTask } from './tasks';
 import type { Data, Task } from './types';
 
@@ -18,6 +20,10 @@ export function demoData(today = todayIso()): Data {
     newClient({ name: 'Dr Sophie Leroy', siren: '901 234 567', forme: 'EI', activite: 'Médecin généraliste (BNC)', regimeFiscal: 'IR', regimeTva: 'franchise', contact: 'Sophie Leroy', email: 's.leroy@exemple.fr', honoraires: '1300', budgetHeures: '12' }),
     newClient({ name: 'SCI Les Tilleuls', siren: '789 456 123', forme: 'SCI', activite: 'Location immobilière', regimeFiscal: 'IR', regimeTva: 'franchise', contact: 'Famille Bernard', honoraires: '800', budgetHeures: '8' }),
   ];
+
+  const staff: [string, number][] = [['Camille', 4], ['Hugo', 3.5], ['Camille', 3], ['Hugo', 1.5], ['Hugo', 0.75]];
+  clients.forEach((c, i) => { c.manager = staff[i][0]; c.joursMois = staff[i][1]; });
+  clients[0].jourTva = 19; clients[1].jourTva = 21; clients[2].jourTva = 24;
 
   const tasks: Task[] = [];
   for (const c of clients) {
@@ -66,5 +72,7 @@ export function demoData(today = todayIso()): Data {
     tasks.push(t);
   }
 
-  return { clients, tasks, settings: { ...defaultSettings(), profileName: 'Nini' } };
+  const settings = { ...defaultSettings(), profileName: 'Nini' };
+  settings.plans[today.slice(0, 7)] = buildPlan(today.slice(0, 7), clients, DEFAULT_ROUTINE).blocks;
+  return { clients, tasks, settings };
 }
