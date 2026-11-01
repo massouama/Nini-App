@@ -1,40 +1,16 @@
 <!doctype html>
 <html lang="fr">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Nini · Suivi des dossiers</title>
-  <meta name="description" content="Suivi des tâches et des dossiers d'un collaborateur comptable : échéances, temps passé, rapports.">
-  <meta name="theme-color" content="#f4f1ea">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='2' fill='%231c1b18'/%3E%3Ctext x='16' y='23' font-family='Georgia' font-style='italic' font-size='20' text-anchor='middle' fill='%23f4f1ea'%3EN%3C/text%3E%3C/svg%3E">
-  <link rel="stylesheet" href="css/styles.css">
-</head>
-<body>
-  <div class="app">
-    <header class="mast no-print">
-      <a class="mark" href="#/"><span class="mark-n">Nini</span><span class="mark-s">registre des dossiers</span></a>
-      <nav class="nav">
-        <a href="#/" data-route="dashboard">Aujourd’hui</a>
-        <a href="#/taches" data-route="taches">Tâches<b class="nav-badge" id="nav-late" hidden title="en retard"></b></a>
-        <a href="#/dossiers" data-route="dossiers">Dossiers</a>
-        <a href="#/calendrier" data-route="calendrier">Calendrier</a>
-        <a href="#/rapports" data-route="rapports">Rapports</a>
-        <a href="#/parametres" data-route="parametres">Réglages</a>
-      </nav>
-      <div id="timer-box" hidden></div>
-      <button class="btn primary new-btn" data-action="new-task" title="Nouvelle tâche (touche N)">Nouvelle tâche <kbd>N</kbd></button>
-    </header>
-    <main id="main" tabindex="-1"></main>
-  </div>
-  <dialog id="modal"></dialog>
-  <div id="toasts" aria-live="polite"></div>
-
-  <script src="js/utils.js"></script>
-  <script src="js/store.js"></script>
-  <script src="js/obligations.js"></script>
-  <script src="js/app.js"></script>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="description" content="Suivi des dossiers et des tâches d'un collaborateur comptable." />
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#111114" media="(prefers-color-scheme: dark)" />
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+    <title>Nini</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
 </html>

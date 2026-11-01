@@ -1,46 +1,83 @@
-# Nini · Suivi des dossiers
+# Nini · suivi des dossiers
 
-Application web de suivi pour un·e **collaborateur·rice comptable** : une sorte d'ITSM perso pour gérer tous les dossiers clients, les tâches et les échéances, et produire des rapports sur ce qui a été fait et ce qu'il reste à faire.
+Application web pour un·e **collaborateur·rice comptable** : suivre les dossiers clients, les tâches et les échéances, mesurer le temps passé, et produire des rapports sur ce qui a été fait et ce qu'il reste à faire.
 
-Elle n'a **aucune dépendance** et ne demande **ni serveur ni installation** : il suffit d'ouvrir `index.html` dans un navigateur.
+Projet **100 % open source** (licence MIT), comme toutes ses dépendances.
 
 ## Fonctionnalités
 
-| Écran | Ce qu'on y trouve |
-|---|---|
-| **Accueil** | Indicateurs (tâches ouvertes, en retard, échéances à 7 jours, en attente client, terminées et temps du mois), listes « En retard », « Prochaines échéances », « En cours », « En attente client » (avec le nombre de jours d'attente), avancement de chaque dossier sur l'année. |
-| **Tâches** | Toutes les tâches présentées comme des tickets. Recherche, filtres (dossier, statut, échéance, catégorie, priorité), tris, vue **liste** ou **kanban** avec glisser-déposer. |
-| **Fiche tâche** | Statut, priorité, catégorie, échéance, estimation, **étapes** (checklist), **temps passé** (saisie libre « 1h30 » ou **chrono**), **journal** horodaté (commentaires et historique automatique des changements), **récurrence** (la tâche suivante est créée quand celle-ci est terminée), duplication. |
-| **Dossiers** | Fiche client : SIREN, forme juridique, IS/IR, régime de TVA, date de clôture, paie, contact, honoraires, **budget temps**, notes. Statistiques par dossier : retards, avancement, temps passé par rapport au budget. Archivage. |
-| **Poser les échéances** | Crée en un clic les tâches de l'année pour un dossier ou pour tous : TVA (CA3 mensuelle ou trimestrielle, acomptes et CA12), paie/DSN, collecte des pièces, révision et bilan, liasse (2065, 2031/2035, 2072), acomptes et solde d'IS, AG, dépôt au greffe, CFE. Les échéances déjà créées ne sont jamais générées deux fois. |
-| **Calendrier** | Vue mensuelle des échéances, filtrable par dossier. Un clic sur un jour crée une tâche à cette date. |
-| **Rapports** | Rapport d'activité par période (semaine, mois, trimestre, année ou dates libres) et par dossier : travaux réalisés, reste à faire, retards, attente client, temps passé, synthèse par dossier. **Impression / PDF** et **export Excel (CSV)**. |
-| **Réglages** | Prénom, sauvegarde et restauration (JSON), exports CSV des tâches et des dossiers, données de démonstration, remise à zéro. |
+- **Aujourd'hui** : retards, tâches du jour, les 7 prochains jours classés par date, tâches en attente du client (avec le nombre de jours depuis la relance).
+- **Toutes les tâches** : recherche et filtres (dossier, statut, échéance, catégorie, priorité), affichage en **liste** ou en **tableau** par statut avec glisser-déposer. Ajout rapide au clavier.
+- **Panneau de tâche** : enregistrement automatique, statut, échéance, priorité, catégorie, estimation, **récurrence** (l'occurrence suivante est créée quand la tâche est terminée), **étapes**, **temps passé** (saisie libre « 1h30 » ou **chrono**), **fil d'activité** (commentaires et historique automatique des changements).
+- **Dossiers** : forme juridique, IS/IR, régime de TVA, clôture, paie, contact, honoraires, **budget temps**, notes ; avancement de l'année et retards par dossier ; archivage.
+- **Poser les échéances** : crée en un clic les tâches de l'année pour un ou plusieurs dossiers : TVA (CA3 mensuelle ou trimestrielle, acomptes et CA12), paie et DSN, collecte des pièces, révision, liasse (2065, 2031/2035, 2072), acomptes et solde d'IS, AG, dépôt au greffe, CFE. Une échéance déjà créée ne l'est jamais deux fois.
+- **Calendrier** mensuel des échéances.
+- **Rapports** par période et par dossier : travaux réalisés, reste à faire, retards, temps passé. **Impression / PDF** et **export Excel (CSV)**.
+- **Palette de commandes** (`⌘K` / `Ctrl+K`), raccourci `N` pour une nouvelle tâche, **annulation** après une suppression ou une tâche cochée.
+- Thème clair ou sombre automatique, utilisable sur téléphone.
 
-Raccourci clavier : **N** crée une nouvelle tâche.
+> ⚠️ Les dates proposées sont des **dates usuelles** du calendrier fiscal. Elles servent à planifier le travail et restent modifiables. Elles sont à vérifier pour chaque dossier (jour limite de TVA, option EDI, exercices décalés…).
 
-> ⚠️ Les dates des échéances sont des **dates usuelles** du calendrier fiscal. Elles servent à planifier le travail et peuvent être modifiées. Elles sont à vérifier pour chaque dossier (jour limite de TVA, option EDI, exercices décalés, etc.).
+## Stack
 
-## Données & sauvegarde
+| Rôle | Outil | Licence |
+|---|---|---|
+| Interface | [React](https://react.dev) 19 + [TypeScript](https://www.typescriptlang.org) | MIT / Apache-2.0 |
+| Outil de build | [Vite](https://vite.dev) | MIT |
+| Navigation | [React Router](https://reactrouter.com) | MIT |
+| Base de données, comptes, synchronisation | [Supabase](https://supabase.com) (PostgreSQL), auto-hébergeable | Apache-2.0 |
+| Palette de commandes | [cmdk](https://cmdk.paco.me) | MIT |
+| Icônes | [Lucide](https://lucide.dev) | ISC |
+| Typographie | [Geist](https://vercel.com/font) via Fontsource | OFL-1.1 |
+| Tests | [Vitest](https://vitest.dev) | MIT |
 
-Les données sont enregistrées **uniquement dans le navigateur** (`localStorage`) : rien ne part sur Internet. Conséquences :
+## Démarrer
 
-- les données sont propres à un navigateur sur un appareil donné ;
-- il faut faire **Réglages → Exporter une sauvegarde** régulièrement, et pour passer d'un appareil à un autre (puis « Restaurer une sauvegarde ») ;
-- vider les données du navigateur efface tout.
+Prérequis : [Node.js](https://nodejs.org) 20 ou plus.
 
-## Utilisation
+```bash
+npm install
+npm run dev        # http://localhost:5173
+npm test           # tests de la logique métier (échéances, récurrence, rapports)
+npm run build      # version de production dans dist/
+```
 
-- **En local** : double-cliquer sur `index.html`.
-- **En ligne (GitHub Pages)** : dans le dépôt GitHub, aller dans *Settings → Pages*, choisir la branche et le dossier `/ (root)`. L'app est alors accessible à l'adresse `https://<utilisateur>.github.io/<dépôt>/`. Même en ligne, les données restent dans le navigateur de chaque personne.
+## Deux modes de stockage
 
-## Structure
+### 1. Mode local (par défaut)
+
+Sans configuration, les données restent **dans le navigateur** (`localStorage`). Rien ne quitte l'appareil. Pense à faire **Réglages → Exporter une sauvegarde** de temps en temps. Si la première version de l'app a été utilisée à la même adresse, ses données sont reprises automatiquement.
+
+### 2. Mode synchronisé (Supabase)
+
+Pour retrouver les mêmes données sur ordinateur et téléphone, avec un compte protégé par mot de passe :
+
+1. Crée une instance Supabase :
+   - **soit** un projet gratuit sur [supabase.com](https://supabase.com) ;
+   - **soit** une instance **auto-hébergée** avec Docker, en suivant le [guide officiel](https://supabase.com/docs/guides/self-hosting/docker). Le code de Supabase est open source.
+2. Dans l'éditeur SQL de Supabase, exécute [`supabase/schema.sql`](supabase/schema.sql). Il crée les tables `clients`, `tasks` et `settings`, la sécurité ligne par ligne (chaque compte ne voit que ses données) et la synchronisation en temps réel.
+3. Copie `.env.example` en `.env` et renseigne l'URL et la clé `anon` de l'instance (*Project Settings → API*).
+4. Relance `npm run dev` (ou refais le build). L'app demande alors de se connecter. La connexion se fait par e-mail et mot de passe, ou par lien envoyé par e-mail (ce qui demande un serveur SMTP configuré dans Supabase).
+
+Pour passer du mode local au mode synchronisé : **Réglages → Exporter une sauvegarde** en mode local, puis **Restaurer** une fois connecté.
+
+## Mettre en ligne
+
+`npm run build` produit des fichiers statiques dans `dist/`. Ils fonctionnent sur n'importe quel hébergement, y compris dans un sous-dossier, car l'app utilise des adresses en `#/…` : Nginx, Caddy, Apache, [Codeberg Pages](https://codeberg.page), GitHub Pages, un NAS…
+
+## Organisation du code
 
 ```
-index.html            Coquille de l'app (navigation, modale)
-css/styles.css        Styles (clair/sombre automatique, mobile, impression)
-js/utils.js           Dates, durées, formatage, export CSV
-js/store.js           Modèle de données, référentiels, stockage local, règles métier
-js/obligations.js     Générateur d'échéances fiscales, sociales et juridiques
-js/app.js             Vues, modales, rapports, chrono, routeur, données de démo
+src/
+  domain/      logique métier pure et testée (types, règles des tâches, échéances fiscales, rapports, données d'exemple)
+  data/        stockage : interface Repo + implémentations locale et Supabase, état de l'app (AppStore)
+  components/  barre latérale, panneau de tâche, palette ⌘K, fenêtres, lignes de tâches…
+  pages/       Aujourd'hui, Tâches, Dossiers, Fiche dossier, Calendrier, Rapports, Réglages, Connexion
+  lib/         dates, formats, fichiers (CSV, téléchargements)
+  styles/      feuille de style unique (variables, thème sombre, mobile, impression)
+supabase/schema.sql   schéma de base de données et règles d'accès
 ```
+
+## Licence
+
+[MIT](LICENSE)

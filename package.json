@@ -1,0 +1,33 @@
+{
+  "name": "nini-app",
+  "private": true,
+  "version": "2.0.0",
+  "type": "module",
+  "license": "MIT",
+  "description": "Suivi des dossiers et des tâches d'un collaborateur comptable : échéances, temps passé, rapports.",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@fontsource-variable/geist": "5.2.8",
+    "@fontsource-variable/geist-mono": "5.2.7",
+    "@supabase/supabase-js": "2.75.0",
+    "cmdk": "1.1.1",
+    "lucide-react": "0.546.0",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "react-router-dom": "7.18.5"
+  },
+  "devDependencies": {
+    "@types/react": "19.2.2",
+    "@types/react-dom": "19.2.2",
+    "@vitejs/plugin-react": "5.0.4",
+    "typescript": "5.9.3",
+    "vite": "7.3.7",
+    "vitest": "4.1.12"
+  }
+}
