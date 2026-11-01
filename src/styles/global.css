@@ -765,3 +765,8 @@ a.stat:hover { color: var(--accent-text); text-decoration: none; }
 .security-log .k-export .k, .security-log .k-restore .k { color: var(--accent-text); }
 .security-log .d { color: var(--text-2); word-break: break-word; }
 @media (max-width: 860px) { .security-log li { grid-template-columns: 1fr; gap: 0; } .security-stats { grid-template-columns: 1fr 1fr 1fr; } }
+
+.now-title { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; color: var(--text); font-weight: 600; }
+.now-title .muted { font-weight: 400; }
+.now-meter { flex: 0 0 90px; }
+#a-traiter > .section { margin-top: 30px; }

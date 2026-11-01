@@ -4,7 +4,7 @@ import { useData, useStore } from '../data/StoreContext';
 import { today } from '../lib/dates';
 import { fmtClock, fmtMin } from '../lib/format';
 import { clientStats } from '../domain/stats';
-import { clientCode, isOpen, isOverdue } from '../domain/tasks';
+import { clientCode, isOpen, isOverdue, isStarted } from '../domain/tasks';
 import { useToast } from './ui/Toasts';
 import { useBackup } from './useBackup';
 import { managerColor, managersOf } from './managers';
@@ -20,7 +20,7 @@ export function Sidebar({ onSearch, open, onNavigate }: { onSearch: () => void; 
   const timerTask = settings.timer ? tasks.find(t => t.id === settings.timer!.taskId) : undefined;
   const now = useNow(!!timerTask);
   const backup = useBackup();
-  const todayCount = tasks.filter(t => isOpen(t) && t.dueDate && t.dueDate <= ref).length;
+  const todayCount = tasks.filter(t => isOpen(t) && t.status !== 'waiting' && ((t.dueDate && t.dueDate <= ref) || isStarted(t, settings.routine, ref))).length;
   const lateCount = tasks.filter(t => isOverdue(t, ref)).length;
   const active = clients.filter(c => !c.archived).sort((a, b) => a.name.localeCompare(b.name, 'fr'));
   const groups = [

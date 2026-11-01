@@ -4,7 +4,7 @@ import { useData, useStore } from '../data/StoreContext';
 import { fmtDate, fmtDateTime, today } from '../lib/dates';
 import { fmtClock, fmtMin, parseDuration, uid } from '../lib/format';
 import { CATEGORIES, PRIORITIES, RECURRENCES, STATUSES } from '../domain/constants';
-import { clientCode, logEntry, newTask, timeSpent, withStatus } from '../domain/tasks';
+import { clientCode, logEntry, newTask, startOf, timeSpent, withStatus } from '../domain/tasks';
 import type { Task } from '../domain/types';
 import { DueLabel } from './DueLabel';
 import { StatusIcon } from './StatusIcon';
@@ -228,6 +228,9 @@ function PanelContent({ task, isNew, title, desc, setTitle, setDesc, update }: {
                 {STATUSES.map(s => <option key={s.id} value={s.id}>{s.label}</option>)}
               </select>
             </span>
+          </Prop>
+          <Prop label="Début">
+            <input type="date" value={startOf(task, data.settings.routine)} onChange={e => update({ startDate: e.target.value })} />
           </Prop>
           <Prop label="Échéance">
             <span className="with-hint">

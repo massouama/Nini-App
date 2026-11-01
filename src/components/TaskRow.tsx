@@ -33,7 +33,7 @@ export function Check({ task }: { task: Task }) {
   );
 }
 
-export function TaskRow({ task, showClient = true, extra }: { task: Task; showClient?: boolean; extra?: ReactNode }) {
+export function TaskRow({ task, showClient = true, extra, clientAsTitle = false }: { task: Task; showClient?: boolean; extra?: ReactNode; clientAsTitle?: boolean }) {
   const { clients, settings } = useData();
   const nav = useTaskNav();
   const client = clients.find(c => c.id === task.clientId);
@@ -41,8 +41,8 @@ export function TaskRow({ task, showClient = true, extra }: { task: Task; showCl
   const ckDone = task.checklist.filter(c => c.done).length;
   const running = settings.timer?.taskId === task.id;
   const meta: ReactNode[] = [];
-  if (showClient && client) meta.push(client.name);
-  meta.push(task.category);
+  if (showClient && client && !clientAsTitle) meta.push(client.name);
+  if (!clientAsTitle) meta.push(task.category);
   if (task.checklist.length) meta.push(`${ckDone}/${task.checklist.length} étapes`);
   if (spent) meta.push(fmtMin(spent));
   if (task.recurrence) meta.push(<span className="inline-icon"><Repeat size={11} />{label(RECURRENCES, task.recurrence).replace('Chaque ', '')}</span>);
@@ -61,7 +61,7 @@ export function TaskRow({ task, showClient = true, extra }: { task: Task; showCl
         <div className="task-title">
           {running && <span className="rec" title="Chrono en cours" />}
           {(task.status === 'doing' || task.status === 'waiting') && <StatusIcon status={task.status} size={13} />}
-          <span className="t">{task.title}</span>
+          <span className="t">{clientAsTitle && client ? client.name : task.title}</span>
           <PrioTag priority={task.priority} />
         </div>
         <div className="task-meta">
@@ -76,9 +76,9 @@ export function TaskRow({ task, showClient = true, extra }: { task: Task; showCl
   );
 }
 
-export function TaskList({ tasks, showClient = true, empty, extra }: {
-  tasks: Task[]; showClient?: boolean; empty?: ReactNode; extra?: (t: Task) => ReactNode;
+export function TaskList({ tasks, showClient = true, empty, extra, clientAsTitle }: {
+  tasks: Task[]; showClient?: boolean; empty?: ReactNode; extra?: (t: Task) => ReactNode; clientAsTitle?: boolean;
 }) {
   if (!tasks.length) return empty ? <div className="empty-line">{empty}</div> : null;
-  return <div className="task-list">{tasks.map(t => <TaskRow key={t.id} task={t} showClient={showClient} extra={extra?.(t)} />)}</div>;
+  return <div className="task-list">{tasks.map(t => <TaskRow key={t.id} task={t} showClient={showClient} extra={extra?.(t)} clientAsTitle={clientAsTitle} />)}</div>;
 }

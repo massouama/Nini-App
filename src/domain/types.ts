@@ -15,6 +15,8 @@ export interface Task {
   priority: Priority;
   status: Status;
   dueDate: string;
+  /** Date à partir de laquelle on peut commencer (vide = dès maintenant). */
+  startDate?: string;
   estimate: string;
   description: string;
   recurrence: Recurrence;

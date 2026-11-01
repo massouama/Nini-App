@@ -1,8 +1,8 @@
-import { addDays, addMonths, fmtDate, isoFromMs, today } from '../lib/dates';
+import { addDays, addMonths, fmtDate, isoFromMs, today, withDay } from '../lib/dates';
 import { uid } from '../lib/format';
 import { PRIORITIES, PRIO_RANK, STATUSES, label } from './constants';
 import { DEFAULT_ROUTINE } from './routine';
-import type { Client, LogEntry, Settings, Status, Task } from './types';
+import type { Client, LogEntry, RoutinePhase, Settings, Status, Task } from './types';
 
 export const defaultSettings = (): Settings => ({ profileName: '', timer: null, lastBackup: null, routine: structuredClone(DEFAULT_ROUTINE), plans: {} });
 
@@ -33,6 +33,25 @@ export const normalizeClient = (c: Partial<Client>): Client => newClient(c);
 
 export const isOpen = (t: Task) => t.status !== 'done';
 export const isOverdue = (t: Task, ref = today()) => t.status !== 'done' && !!t.dueDate && t.dueDate < ref;
+/**
+ * Date de début effective : celle de la tâche, sinon celle de sa période de routine
+ * (déduite de la clé « …|routine|<période>|…|AAAA-MM »), sinon aucune.
+ */
+export function startOf(t: Task, routine: RoutinePhase[]): string {
+  if (t.startDate) return t.startDate;
+  if (!t.key?.includes('routine|')) return '';
+  const parts = t.key.split('|');
+  const phase = routine.find(p => p.id === parts[parts.indexOf('routine') + 1]);
+  const month = parts[parts.length - 1];
+  return phase && /^\d{4}-\d{2}$/.test(month) ? withDay(`${month}-01`, phase.from) : '';
+}
+
+/** Tâche commencée (date de début atteinte) et pas encore terminée. */
+export const isStarted = (t: Task, routine: RoutinePhase[], ref = today()) => {
+  const s = startOf(t, routine);
+  return isOpen(t) && !!s && s <= ref;
+};
+
 export const timeSpent = (t: Task) => t.timeEntries.reduce((s, e) => s + (e.minutes || 0), 0);
 export const timeIn = (t: Task, from: string, to: string) =>
   t.timeEntries.filter(e => e.date >= from && e.date <= to).reduce((s, e) => s + (e.minutes || 0), 0);
