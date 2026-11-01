@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Nini · Suivi des dossiers</title>
+  <meta name="description" content="Suivi des tâches et des dossiers d'un collaborateur comptable : échéances, temps passé, rapports.">
+  <meta name="theme-color" content="#0f766e">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230f766e'/%3E%3Ctext x='16' y='22' font-family='Arial' font-weight='700' font-size='17' text-anchor='middle' fill='white'%3EN%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar no-print">
+      <div class="brand">
+        <span class="logo">N</span>
+        <div><strong>Nini</strong><small>Suivi des dossiers</small></div>
+      </div>
+      <nav class="nav">
+        <a href="#/" data-route="dashboard"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg><span>Accueil</span></a>
+        <a href="#/taches" data-route="taches"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg><span>Tâches</span><b class="nav-badge" id="nav-late" hidden></b></a>
+        <a href="#/dossiers" data-route="dossiers"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg><span>Dossiers</span></a>
+        <a href="#/calendrier" data-route="calendrier"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span>Calendrier</span></a>
+        <a href="#/rapports" data-route="rapports"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h5"/></svg><span>Rapports</span></a>
+        <a href="#/parametres" data-route="parametres"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></svg><span>Réglages</span></a>
+      </nav>
+      <div id="timer-box" hidden></div>
+      <button class="btn primary new-btn" data-action="new-task" title="Nouvelle tâche (raccourci : N)">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg><span>Nouvelle tâche</span>
+      </button>
+    </aside>
+    <main id="main" tabindex="-1"></main>
+  </div>
+  <dialog id="modal"></dialog>
+  <div id="toasts" aria-live="polite"></div>
+
+  <script src="js/utils.js"></script>
+  <script src="js/store.js"></script>
+  <script src="js/obligations.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
